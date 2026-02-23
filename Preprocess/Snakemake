@@ -1,0 +1,17 @@
+rule infer_strand:
+    # conda env: rseqc
+    Script:
+        bash infer_exp_all.sh
+        python calculateStrand.py
+        
+rule find_vcf_paths:
+    # taking a lot of time :/
+    Script:
+        python findDNAPaths.py
+        
+
+rule_create_initial_drop_sa:
+    input:
+         "basic_clinical_info"
+    Script:
+        /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/makeDROPSample.py

@@ -1,0 +1,237 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 200
+Job stats:
+job                   count
+------------------  -------
+all                       1
+splicing_dna_first       16
+total                    17
+
+Select jobs to execute...
+
+[Sun Feb  8 22:01:33 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Biliary_Tract/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Biliary_Tract/results_gene_all.tsv
+    jobid: 5
+    reason: Forced execution
+    wildcards: cohort=Biliary_Tract
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 5 with external jobid '47066603 logs/cluster/splicing_dna_first/cohort=Biliary_Tract/jobid5_c6b32692-6711-433f-a168-097e4bf004a1.out'.
+
+[Sun Feb  8 22:01:34 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Esophagus_Stomach/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Esophagus_Stomach/results_gene_all.tsv
+    jobid: 16
+    reason: Forced execution
+    wildcards: cohort=Esophagus_Stomach
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 16 with external jobid '47066604 logs/cluster/splicing_dna_first/cohort=Esophagus_Stomach/jobid16_6a9044ed-8f2f-4fe0-b520-a43201a82968.out'.
+
+[Sun Feb  8 22:01:34 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Skin/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Skin/results_gene_all.tsv
+    jobid: 8
+    reason: Forced execution
+    wildcards: cohort=Skin
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 8 with external jobid '47066605 logs/cluster/splicing_dna_first/cohort=Skin/jobid8_43500cdf-3a36-4da3-a3ad-7fbc00deeb16.out'.
+
+[Sun Feb  8 22:01:35 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_gene_all.tsv
+    jobid: 2
+    reason: Forced execution
+    wildcards: cohort=Soft_Tissue
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 2 with external jobid '47066606 logs/cluster/splicing_dna_first/cohort=Soft_Tissue/jobid2_495ac44f-104f-4b48-a654-0fc8a9e25fab.out'.
+
+[Sun Feb  8 22:01:35 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/LMS/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/LMS/results_gene_all.tsv
+    jobid: 12
+    reason: Forced execution
+    wildcards: cohort=LMS
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 12 with external jobid '47066607 logs/cluster/splicing_dna_first/cohort=LMS/jobid12_0028f4f7-2339-487c-9299-ea61c61d099e.out'.
+
+[Sun Feb  8 22:01:35 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/COAD/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/COAD/results_gene_all.tsv
+    jobid: 4
+    reason: Forced execution
+    wildcards: cohort=COAD
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 4 with external jobid '47066608 logs/cluster/splicing_dna_first/cohort=COAD/jobid4_8990b406-cd4d-43b8-9386-99da181bda58.out'.
+
+[Sun Feb  8 22:01:36 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Head_and_Neck/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Head_and_Neck/results_gene_all.tsv
+    jobid: 11
+    reason: Forced execution
+    wildcards: cohort=Head_and_Neck
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 11 with external jobid '47066609 logs/cluster/splicing_dna_first/cohort=Head_and_Neck/jobid11_9fb8df88-689b-48ac-b1a5-d8d301d552a0.out'.
+
+[Sun Feb  8 22:01:36 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/CNS_Brain/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/CNS_Brain/results_gene_all.tsv
+    jobid: 15
+    reason: Forced execution
+    wildcards: cohort=CNS_Brain
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 15 with external jobid '47066610 logs/cluster/splicing_dna_first/cohort=CNS_Brain/jobid15_927591c7-aec9-4c6a-9177-5fb0c8d68dae.out'.
+
+[Sun Feb  8 22:01:37 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Pancreas/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Pancreas/results_gene_all.tsv
+    jobid: 9
+    reason: Forced execution
+    wildcards: cohort=Pancreas
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 9 with external jobid '47066612 logs/cluster/splicing_dna_first/cohort=Pancreas/jobid9_fb3c94e2-160f-4a3e-832b-5b7a3b1013ad.out'.
+
+[Sun Feb  8 22:01:37 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Lung/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Lung/results_gene_all.tsv
+    jobid: 3
+    reason: Forced execution
+    wildcards: cohort=Lung
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 3 with external jobid '47066613 logs/cluster/splicing_dna_first/cohort=Lung/jobid3_780e97d9-b381-444a-896b-c71855da8a40.out'.
+
+[Sun Feb  8 22:01:37 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Breast/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Breast/results_gene_all.tsv
+    jobid: 1
+    reason: Forced execution
+    wildcards: cohort=Breast
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 1 with external jobid '47066614 logs/cluster/splicing_dna_first/cohort=Breast/jobid1_433f4c45-2899-4357-9b75-94e0b1d7bd40.out'.
+
+[Sun Feb  8 22:01:38 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_gene_all.tsv
+    jobid: 7
+    reason: Forced execution
+    wildcards: cohort=Other
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 7 with external jobid '47066615 logs/cluster/splicing_dna_first/cohort=Other/jobid7_9e8cb71d-0047-44cb-bb81-9f73985e468d.out'.
+
+[Sun Feb  8 22:01:38 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/ACC/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/ACC/results_gene_all.tsv
+    jobid: 10
+    reason: Forced execution
+    wildcards: cohort=ACC
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 10 with external jobid '47066616 logs/cluster/splicing_dna_first/cohort=ACC/jobid10_22ac5d21-761f-4c2f-87f5-2054a3e678d3.out'.
+
+[Sun Feb  8 22:01:39 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/SYNS/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/SYNS/results_gene_all.tsv
+    jobid: 14
+    reason: Forced execution
+    wildcards: cohort=SYNS
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 14 with external jobid '47066617 logs/cluster/splicing_dna_first/cohort=SYNS/jobid14_8b6e017a-3391-4bbf-9106-74110673772b.out'.
+
+[Sun Feb  8 22:01:39 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bone/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bone/results_gene_all.tsv
+    jobid: 6
+    reason: Forced execution
+    wildcards: cohort=Bone
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 6 with external jobid '47066618 logs/cluster/splicing_dna_first/cohort=Bone/jobid6_3669e556-5642-4291-bca6-88e78935ab70.out'.
+
+[Sun Feb  8 22:01:40 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bowel/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bowel/results_gene_all.tsv
+    jobid: 13
+    reason: Forced execution
+    wildcards: cohort=Bowel
+    resources: mem_mb=50000, mem_mib=47684, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 13 with external jobid '47066619 logs/cluster/splicing_dna_first/cohort=Bowel/jobid13_401a3cbd-75c7-4d19-a735-878879df9f15.out'.
+[Sun Feb  8 22:21:59 2026]
+Error in rule splicing_dna_first:
+    jobid: 4
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/COAD/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/COAD/results_gene_all.tsv
+    cluster_jobid: 47066608 logs/cluster/splicing_dna_first/cohort=COAD/jobid4_8990b406-cd4d-43b8-9386-99da181bda58.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 4, external: 47066608 logs/cluster/splicing_dna_first/cohort=COAD/jobid4_8990b406-cd4d-43b8-9386-99da181bda58.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.4.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sun Feb  8 22:22:35 2026]
+Error in rule splicing_dna_first:
+    jobid: 5
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Biliary_Tract/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Biliary_Tract/results_gene_all.tsv
+    cluster_jobid: 47066603 logs/cluster/splicing_dna_first/cohort=Biliary_Tract/jobid5_c6b32692-6711-433f-a168-097e4bf004a1.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 5, external: 47066603 logs/cluster/splicing_dna_first/cohort=Biliary_Tract/jobid5_c6b32692-6711-433f-a168-097e4bf004a1.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.5.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sun Feb  8 22:26:30 2026]
+Error in rule splicing_dna_first:
+    jobid: 1
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Breast/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Breast/results_gene_all.tsv
+    cluster_jobid: 47066614 logs/cluster/splicing_dna_first/cohort=Breast/jobid1_433f4c45-2899-4357-9b75-94e0b1d7bd40.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 1, external: 47066614 logs/cluster/splicing_dna_first/cohort=Breast/jobid1_433f4c45-2899-4357-9b75-94e0b1d7bd40.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.1.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sun Feb  8 22:28:15 2026]
+Error in rule splicing_dna_first:
+    jobid: 14
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/SYNS/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/SYNS/results_gene_all.tsv
+    cluster_jobid: 47066617 logs/cluster/splicing_dna_first/cohort=SYNS/jobid14_8b6e017a-3391-4bbf-9106-74110673772b.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 14, external: 47066617 logs/cluster/splicing_dna_first/cohort=SYNS/jobid14_8b6e017a-3391-4bbf-9106-74110673772b.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.14.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sun Feb  8 22:35:10 2026]
+Error in rule splicing_dna_first:
+    jobid: 8
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Skin/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Skin/results_gene_all.tsv
+    cluster_jobid: 47066605 logs/cluster/splicing_dna_first/cohort=Skin/jobid8_43500cdf-3a36-4da3-a3ad-7fbc00deeb16.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 8, external: 47066605 logs/cluster/splicing_dna_first/cohort=Skin/jobid8_43500cdf-3a36-4da3-a3ad-7fbc00deeb16.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.8.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Sun Feb  8 22:36:30 2026]
+Error in rule splicing_dna_first:
+    jobid: 16
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Esophagus_Stomach/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Esophagus_Stomach/results_gene_all.tsv
+    cluster_jobid: 47066604 logs/cluster/splicing_dna_first/cohort=Esophagus_Stomach/jobid16_6a9044ed-8f2f-4fe0-b520-a43201a82968.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 16, external: 47066604 logs/cluster/splicing_dna_first/cohort=Esophagus_Stomach/jobid16_6a9044ed-8f2f-4fe0-b520-a43201a82968.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.jho5zh8u/snakejob.splicing_dna_first.16.sh). For error details see the cluster log and the log files of the involved rule(s).
+Terminating processes on user request, this might take some time.
+Cancelling snakemake on user request.

@@ -1,0 +1,8 @@
+**/*.ipynb_checkpoints/*
+
+**/*.vcf*/*
+**/*.png*/*
+
+**/*__pycache__/**
+
+**/logs/**

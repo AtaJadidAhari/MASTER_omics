@@ -1,0 +1,79 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 10
+Job stats:
+job                   count
+------------------  -------
+all                       1
+splicing_dna_first        4
+total                     5
+
+Select jobs to execute...
+
+[Tue Feb 10 19:04:50 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Head_and_Neck/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Head_and_Neck/results_all.tsv.gz
+    jobid: 3
+    reason: Missing output files: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Head_and_Neck/results_all.tsv.gz
+    wildcards: cohort=Head_and_Neck
+    resources: mem_mb=199000, mem_mib=189782, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 3 with external jobid '47142366 logs/cluster/splicing_dna_first/cohort=Head_and_Neck/jobid3_e9ac82cb-9b34-4206-9805-7b7cce7d71b4.out'.
+
+[Tue Feb 10 19:04:52 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bone/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bone/results_all.tsv.gz
+    jobid: 4
+    reason: Missing output files: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Bone/results_all.tsv.gz
+    wildcards: cohort=Bone
+    resources: mem_mb=199000, mem_mib=189782, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 4 with external jobid '47142367 logs/cluster/splicing_dna_first/cohort=Bone/jobid4_fb5e1b5e-248e-416e-84b5-4320fea78b5f.out'.
+
+[Tue Feb 10 19:04:53 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_all.tsv.gz
+    jobid: 15
+    reason: Missing output files: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_all.tsv.gz
+    wildcards: cohort=Soft_Tissue
+    resources: mem_mb=199000, mem_mib=189782, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 15 with external jobid '47142368 logs/cluster/splicing_dna_first/cohort=Soft_Tissue/jobid15_b9867e72-561d-4e5a-9f96-81715b88cd55.out'.
+
+[Tue Feb 10 19:04:54 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    jobid: 12
+    reason: Missing output files: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    wildcards: cohort=Other
+    resources: mem_mb=199000, mem_mib=189782, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 12 with external jobid '47142371 logs/cluster/splicing_dna_first/cohort=Other/jobid12_b8aeb733-043c-4245-864e-251b3607180a.out'.
+[Tue Feb 10 21:16:15 2026]
+Finished job 4.
+1 of 5 steps (20%) done
+[Tue Feb 10 21:31:42 2026]
+Finished job 3.
+2 of 5 steps (40%) done
+[Wed Feb 11 05:06:39 2026]
+Error in rule splicing_dna_first:
+    jobid: 15
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Soft_Tissue/results_all.tsv.gz
+    cluster_jobid: 47142368 logs/cluster/splicing_dna_first/cohort=Soft_Tissue/jobid15_b9867e72-561d-4e5a-9f96-81715b88cd55.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 15, external: 47142368 logs/cluster/splicing_dna_first/cohort=Soft_Tissue/jobid15_b9867e72-561d-4e5a-9f96-81715b88cd55.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.j4d39ul4/snakejob.splicing_dna_first.15.sh). For error details see the cluster log and the log files of the involved rule(s).
+[Wed Feb 11 05:11:44 2026]
+Error in rule splicing_dna_first:
+    jobid: 12
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    cluster_jobid: 47142371 logs/cluster/splicing_dna_first/cohort=Other/jobid12_b8aeb733-043c-4245-864e-251b3607180a.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 12, external: 47142371 logs/cluster/splicing_dna_first/cohort=Other/jobid12_b8aeb733-043c-4245-864e-251b3607180a.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.j4d39ul4/snakejob.splicing_dna_first.12.sh). For error details see the cluster log and the log files of the involved rule(s).
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2026-02-10T190445.395577.snakemake.log

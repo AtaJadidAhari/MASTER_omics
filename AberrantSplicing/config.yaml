@@ -1,0 +1,180 @@
+projectTitle: "DROP: MASTER all samples"
+root: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/
+htmlOutputPath: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/Output/html  # path for HTML rendered reports
+indexWithFolderName: true # whether the root base name should be part of the index name
+
+hpoFile: null  # if null, downloads it from webserver
+sampleAnnotation: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/master_drop_sample_annotation_sizeFactorFiltered_0.1.tsv # path to sample annotation (see documentation on how to create it)
+
+geneAnnotation:
+    v19: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/Data/gencode.v19.annotation_plain.gtf
+genomeAssembly: hg19
+genome: 
+    hs37d5: /omics/odcf/project/ODCF/reference_genomes/bwa06_1KGRef_PhiX/hs37d5_PhiX.fa # path to reference genome sequence in fasta format.
+    # You can define multiple reference genomes in yaml format, ncbi: path/to/ncbi, ucsc: path/to/ucsc
+    # the keywords that define the path should be in the GENOME column of the sample annotation table
+
+exportCounts:
+    # specify which gene annotations to include and which
+    # groups to exclude when exporting counts
+    geneAnnotations:
+        - v19
+    excludeGroups: null
+
+aberrantExpression:
+    run: True
+    groups:
+        - Bowel
+        - Pancreas
+        - Soft_Tissue
+        - Breast
+        - Other
+        - ACC
+        - Bone          
+        - Lung
+        - Biliary_Tract
+        - SYNS
+        - Head_and_Neck
+        - LMS
+        - Esophagus_Stomach
+        - CNS_Brain       
+        - Skin
+        - COAD
+        #- Unstranded_data
+    fpkmCutoff: 1
+    implementation: autoencoder
+    padjCutoff: 0.05
+    zScoreCutoff: 0
+    genesToTest: null
+    maxTestedDimensionProportion: 3
+    yieldSize: 2000000
+    useOHTtoObtainQ: True
+
+aberrantSplicing:
+    run: True 
+    groups:
+        # - Bowel
+        # - Pancreas
+        # - Soft_Tissue
+        # - Breast
+         - Other
+        # - ACC
+        # - Bone
+        # - Lung
+        # - Biliary_Tract
+        # - SYNS
+        # - Head_and_Neck
+        # - LMS
+        # - Esophagus_Stomach
+        # - CNS_Brain
+        # - Skin
+        # - COAD
+#        - Unstranded_data
+    useOHTtoObtainQ: true
+    recount: false
+    longRead: false
+    keepNonStandardChrs: true
+    filter: true
+    minExpressionInOneSample: 20
+    quantileMinExpression: 10
+    quantileForFitering: 0.75 # changed from 0.95 for FRASER2
+    minDeltaPsi: 0.05
+    implementation: PCA
+    padjCutoff: 0.05 # 0.1 in template
+    maxTestedDimensionProportion: 6
+    genesToTest: null
+    ### FRASER1 configuration
+    FRASER_version: "FRASER2" 
+    deltaPsiCutoff : 0.1 # changed from template for FRASER2 
+    ### For FRASER2, use the follwing parameters instead of the 3 lines above:
+    # FRASER_version: "FRASER2"
+    # deltaPsiCutoff : 0.1
+    # quantileForFiltering: 0.75
+
+mae:
+    run: true
+    groups:
+    #    - Bowel
+    #    - Pancreas
+        - Soft_Tissue
+    #    - Breast
+        - Other
+    #    - ACC
+    #    - Bone
+    #    - Lung
+    #    - Biliary_Tract
+    #    - SYNS
+    #    - Head_and_Neck
+    #    - LMS
+    #    - Esophagus_Stomach
+    #    - CNS_Brain
+    #    - Skin
+    #    - COAD
+    #    - Unstranded_data
+        - MASTER_all_stranded
+    gatkIgnoreHeaderCheck: true
+    padjCutoff: 0.05
+    allelicRatioCutoff: 0.8
+    addAF: true
+    maxAF: 0.001
+    maxVarFreqCohort: 0.05
+    # VCF-BAM matching
+    qcVcf: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/Data/qc_vcf_1000G_hs37d5.vcf.gz
+    qcGroups:
+        #- Bowel
+        #- Pancreas
+        - Soft_Tissue
+        #- Breast
+        - Other
+        #- ACC
+        #- Bone
+        #- Lung
+        #- Biliary_Tract
+        #- SYNS
+        #- Head_and_Neck
+        #- LMS
+        #- Esophagus_Stomach
+        #- CNS_Brain
+        #- Skin
+        #- COAD
+        #- Unstranded_data
+        - MASTER_all_stranded
+    dnaRnaMatchCutoff: 0.85
+
+rnaVariantCalling:
+    run: false
+    groups:
+        - Bowel
+        - Pancreas
+        - Soft_Tissue
+        - Breast
+        - Other
+        - ACC
+        - Bone
+        - Lung
+        - Biliary_Tract
+        - SYNS
+        - Head_and_Neck
+        - LMS
+        - Esophagus_Stomach
+        - CNS_Brain
+        - Skin
+        - COAD
+        - Unstranded_data
+    highQualityVCFs:
+        - Data/Mills_and_1000G_gold_standard.indels.hg19.sites.chrPrefix.vcf.gz
+        - Data/1000G_phase1.snps.high_confidence.hg19.sites.chrPrefix.vcf.gz
+    dbSNP: Data/00-All.vcf.gz
+    repeat_mask: Data/hg19_repeatMasker_sorted.chrPrefix.bed
+    createSingleVCF: true
+    addAF: true
+    maxAF: 0.001
+    maxVarFreqCohort: 0.05
+    hcArgs: ""
+    minAlt: 3
+    yieldSize: 100000
+
+tools:
+    gatkCmd: gatk
+    bcftoolsCmd: bcftools
+    samtoolsCmd: samtools

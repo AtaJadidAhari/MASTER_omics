@@ -1,0 +1,22 @@
+import pandas as pd
+
+sa = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/master_drop_sample_annotation_sizeFactorFiltered_0.1.tsv", sep="\t")
+cohorts = list(set(sa["Diag"]))
+cohorts.remove("Unstranded_data")
+
+rule all:
+    input:
+        expand(
+            "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all.tsv.gz",
+            cohort=cohorts
+        )
+
+rule splicing_dna_first:
+    input:
+        "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_per_junction.tsv"
+    params:
+        cohort = "{cohort}"
+    output:
+        "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all.tsv.gz"
+    script:
+        "dna_first.R"

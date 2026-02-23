@@ -1,0 +1,32 @@
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cluster nodes: 10
+Job stats:
+job                   count
+------------------  -------
+all                       1
+splicing_dna_first        1
+total                     2
+
+Select jobs to execute...
+
+[Tue Feb 17 17:07:52 2026]
+rule splicing_dna_first:
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    jobid: 11
+    reason: Missing output files: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    wildcards: cohort=Other
+    resources: mem_mb=599000, mem_mib=571251, disk_mb=1000, disk_mib=954, tmpdir=<TBD>
+
+Submitted job 11 with external jobid '47273532 logs/cluster/splicing_dna_first/cohort=Other/jobid11_128588a6-fe16-4e33-bc73-0f6b0e3ca46d.out'.
+[Tue Feb 17 18:11:36 2026]
+Error in rule splicing_dna_first:
+    jobid: 11
+    input: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_per_junction.tsv
+    output: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/Other/results_all.tsv.gz
+    cluster_jobid: 47273532 logs/cluster/splicing_dna_first/cohort=Other/jobid11_128588a6-fe16-4e33-bc73-0f6b0e3ca46d.out
+
+Error executing rule splicing_dna_first on cluster (jobid: 11, external: 47273532 logs/cluster/splicing_dna_first/cohort=Other/jobid11_128588a6-fe16-4e33-bc73-0f6b0e3ca46d.out, jobscript: /home/a379i/Scripts/AberrantSplicing/.snakemake/tmp.p3yaj56r/snakejob.splicing_dna_first.11.sh). For error details see the cluster log and the log files of the involved rule(s).
+Exiting because a job execution failed. Look above for error message
+Complete log: .snakemake/log/2026-02-17T170741.695435.snakemake.log

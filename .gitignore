@@ -1,8 +1,15 @@
 **/*.ipynb_checkpoints/*
 
 **/*.vcf*/*
-**/*.png*/*
+*.png
 
 **/*__pycache__/**
 
 **/logs/**
+
+.vscode/*
+
+**/.snakemake/
+
+*.csv
+*.tsv

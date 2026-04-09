@@ -20,7 +20,7 @@ import numpy as np
 from scipy.stats import beta
 from itables import init_notebook_mode
 import polars as pl
-
+import sys
 init_notebook_mode(all_interactive=True)
 
 
@@ -43,12 +43,12 @@ sa = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_dat
 needed_cols = ["sampleID", "zScore", "pValue", "padjust", "IMPACT", "geneID",  "geneID_short",
                "#Uploaded_variation_snv", "IMPACT_snv", "ANNOTATION_control_snv", "Consequence_snv", "promoterAI_snv",
                "Location_indel", "IMPACT_indel", "ANNOTATION_control_indel", "Consequence_indel",
-               "padjust_predisp", "padjust_predisp_extended", ]
+               "padjust_predisp", "padjust_predisp_extended", "CNV"]
 py_or_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust.parquet",
                                 columns=needed_cols)
-py_or_res_all = py_or_res_all[py_or_res_all["padjust_predisp_extended"].notna()]
-# py_or_res_all = pd.merge(py_or_res_all, sa[["pid", "Diag", "seq_type", "Oncotree Code"]], left_on="sampleID", right_on="pid")
-# py_or_res_all = pd.merge(py_or_res_all, dresden_dt_cgc[["gene_name", "gene_type", "geneID", "ROLE_IN_CANCER"]], on="geneID", how="left")
+# py_or_res_all = py_or_res_all[py_or_res_all["padjust_predisp_extended"].notna()]
+py_or_res_all = pd.merge(py_or_res_all, sa[["pid", "Diag", "seq_type", "Oncotree Code"]], left_on="sampleID", right_on="pid")
+py_or_res_all = pd.merge(py_or_res_all, dresden_dt_cgc[["gene_name", "gene_type", "geneID", "ROLE_IN_CANCER"]], on="geneID", how="left")
 
 
 # %%
@@ -56,17 +56,16 @@ py_or_res_all = py_or_res_all[py_or_res_all["padjust_predisp_extended"].notna()]
 # py_or_res_all = py_or_res_all.sort_values("pValue")[:10000000]
 
 # %%
-needed_cols = ["sampleID", "zScore", "geneID",  "geneID_short", "IMPACT"]
-gene_zscore = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/zscores/or_variants.csv",
-                         usecols=needed_cols)
-gene_zscore = gene_zscore[gene_zscore["geneID_short"].isin(extended_dresden_dt["geneID_short"])]
+# needed_cols = ["sampleID", "zScore", "geneID",  "geneID_short", "IMPACT"]
+# gene_zscore = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/zscores/or_variants.csv",
+#                          usecols=needed_cols)
+# gene_zscore = gene_zscore[gene_zscore["geneID_short"].isin(extended_dresden_dt["geneID_short"])]
 # gene_zscore = pd.merge(gene_zscore, sa[["pid", "Diag", "seq_type", "Oncotree Code"]], left_on="sampleID", right_on="pid")
 
 # gene_zscore = gene_zscore[gene_zscore["zScore"] < 0][:10000000]
 
 # %%
-gene_zscore.shape
-pota
+# gene_zscore.shape
 
 # %%
 py_or_res_all = py_or_res_all.sort_values("promoterAI_snv")

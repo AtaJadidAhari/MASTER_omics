@@ -13,3 +13,5 @@
 
 *.csv
 *.tsv
+
+AberrantSplicing/.snakemake/*

@@ -57,7 +57,7 @@ print(pr_res_all.shape)
 
 
 # %%
-pr_output_name_2 = "zScore_gt3"
+pr_output_name_2 = "sf_zScores"
 
 # %%
 pr_res_all_zScores = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name_2 + "/pr_variants_predisppadjust_cnv.parquet")

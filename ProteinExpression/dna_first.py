@@ -1,7 +1,5 @@
 import pandas as pd
-from itables import init_notebook_mode
 import plotnine as pn
-init_notebook_mode(all_interactive=True)
 import numpy as np
 
 import sys
@@ -12,7 +10,7 @@ from utils.load_gtf_cgc_dresden import *
 
 pr_output_name = "cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA"
 
-pr_res = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants.csv")
+pr_res = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust_cnv.parquet")
 
 
 def _false_discovery_control(ps, *, axis=0, method='bh'):
@@ -74,26 +72,36 @@ def _false_discovery_control(ps, *, axis=0, method='bh'):
     return np.clip(ps, 0, 1)
 
 
-pr_res_predispostion = pr_res[pr_res["geneID_short"].isin(dresden_dt["geneID_short"])]
+# pr_res_predispostion = pr_res[pr_res["geneID_short"].isin(dresden_dt["geneID_short"])]
+# pr_res_predispostion = pr_res_predispostion[pr_res_predispostion["pValue"].notna()]
+
+# pr_res_predispostion['padjust_predisp'] = _false_discovery_control(pr_res_predispostion['pValue'].values, method='bh')
+# pr_res = pr_res.merge(pr_res_predispostion[["sampleID", "geneID", "padjust_predisp"]], how="left", on=["sampleID", "geneID"])
+
+
+# pr_res_predispostion_extended = pr_res[pr_res["geneID_short"].isin(extended_dresden_dt[extended_dresden_dt["geneID_short"].notna()]["geneID_short"])]
+# pr_res_predispostion_extended = pr_res_predispostion_extended[pr_res_predispostion_extended["pValue"].notna()]
+
+# pr_res_predispostion_extended['padjust_predisp_extended'] = _false_discovery_control(pr_res_predispostion_extended['pValue'].values, method='bh')
+# pr_res = pr_res.merge(pr_res_predispostion_extended[["sampleID", "geneID", "padjust_predisp_extended"]], how="left", on=["sampleID", "geneID"])
+
+
+# pr_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust.parquet", index=None)
+
+
+# # export only outliers too
+# pr_or_res_aberrant = pr_res[(pr_res["padjust"] <= 0.05) | (pr_res["padjust_predisp"] <= 0.05) | (pr_res["padjust_predisp_extended"] <= 0.05)]
+
+
+# pr_or_res_aberrant.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA/pr_varinats_outliers.parquet", index=None)
+
+
+pr_res_predispostion = pr_res[pr_res["geneID_short"].isin(genes_of_interest["geneID_short"])]
 pr_res_predispostion = pr_res_predispostion[pr_res_predispostion["pValue"].notna()]
 
-pr_res_predispostion['padjust_predisp'] = _false_discovery_control(pr_res_predispostion['pValue'].values, method='bh')
-pr_res = pr_res.merge(pr_res_predispostion[["sampleID", "geneID", "padjust_predisp"]], how="left", on=["sampleID", "geneID"])
 
+pr_res_predispostion['padjust_genes_of_interest'] = _false_discovery_control(pr_res_predispostion['pValue'].values, method='bh')
+pr_res = pr_res.merge(pr_res_predispostion[["sampleID", "geneID", "padjust_genes_of_interest"]], how="left", on=["sampleID", "geneID"])
 
-pr_res_predispostion_extended = pr_res[pr_res["geneID_short"].isin(extended_dresden_dt[extended_dresden_dt["geneID_short"].notna()]["geneID_short"])]
-pr_res_predispostion_extended = pr_res_predispostion_extended[pr_res_predispostion_extended["pValue"].notna()]
-
-pr_res_predispostion_extended['padjust_predisp_extended'] = _false_discovery_control(pr_res_predispostion_extended['pValue'].values, method='bh')
-pr_res = pr_res.merge(pr_res_predispostion_extended[["sampleID", "geneID", "padjust_predisp_extended"]], how="left", on=["sampleID", "geneID"])
-
-
-pr_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust.parquet", index=None)
-
-
-# export only outliers too
-pr_or_res_aberrant = pr_res[(pr_res["padjust"] <= 0.05) | (pr_res["padjust_predisp"] <= 0.05) | (pr_res["padjust_predisp_extended"] <= 0.05)]
-
-
-pr_or_res_aberrant.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA/pr_varinats_outliers.parquet", index=None)
+pr_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_interesting_genes_padjust_cnv.parquet", index=None)
 

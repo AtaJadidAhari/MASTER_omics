@@ -107,8 +107,10 @@ if "padjust" in py_or_res_all.columns:
 
 print(py_or_res_all.shape)
 
+py_or_res_all['#CHROM_snv'] = py_or_res_all['#CHROM_snv'].astype(str)
+py_or_res_all['#CHROM_indel'] = py_or_res_all['#CHROM_indel'].astype(str)
 
-py_or_res_all.to_csv(f"{"/".join(outlier_res.split("/")[:-1])}/or_variants.parquet", index=None)
+py_or_res_all.to_parquet(f"{"/".join(outlier_res.split("/")[:-1])}/or_variants.parquet", index=None)
 
 # joined = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/rna_protein_outliers.parquet")
 

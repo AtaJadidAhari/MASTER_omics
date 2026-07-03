@@ -1,5 +1,17 @@
 import pandas as pd
 
+
+sa = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/master_drop_sample_annotation_sizeFactorFiltered_0.1.tsv", sep="\t")
+
+
+
+gene_map = {
+        "ABRAXAS1": "ENSG00000163322", "ELP1": "ENSG00000070061",
+        "G6PC1": "ENSG00000131482", "GBA1": "ENSG00000177628",
+        "MRE11": "ENSG00000020922", "TBXT": "ENSG00000164458"
+    }
+
+
 # --- Load annotation table ---
 gene_annot_dt = pd.read_csv(
     "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_data/preprocess/v19/gene_name_mapping_v19.tsv",
@@ -9,14 +21,29 @@ gene_annot_dt = pd.read_csv(
 # Create geneID_short (strip version suffix)
 gene_annot_dt["geneID_short"] = gene_annot_dt["gene_id"].str.replace(r"\..*", "", regex=True)
 
+
+# fix some old gene names
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000163026", "gene_name"] = "WDCP"
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000251002", "gene_name"] = "TRD-AS1"
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000211809", "gene_name"] = "TRA"
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000130396", "gene_name"] = "AFDN"
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000020922", "gene_name"] = "MRE11"
+gene_annot_dt.loc[gene_annot_dt["geneID_short"] == "ENSG00000163322", "gene_name"] = "ABRAXAS1"
+
+
+
 # --- Load CGC table ---
 cgc = pd.read_csv(
-    "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/Cosmic_CancerGeneCensus_v102_GRCh37.tsv",
+    "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/Cosmic_CancerGeneCensus_v103_GRCh37.tsv",
     sep="\t"
 )
+cgc.loc[cgc["GENE_SYMBOL"] == "TRD", "GENE_SYMBOL"] = "TRD-AS1"
+
 
 # Inner join by gene_name = GENE_SYMBOL
-cgc = gene_annot_dt.merge(cgc, left_on="gene_name", right_on="GENE_SYMBOL", how="inner")
+cgc = gene_annot_dt.merge(cgc, left_on="gene_name", right_on="GENE_SYMBOL", how="right")
+
+cgc = cgc[cgc["geneID_short"].notna()]
 
 # Rename gene_id → geneID
 cgc = cgc.rename(columns={"gene_id": "geneID"})
@@ -51,6 +78,8 @@ dresden_dt["predisposition_gene"] = True
 dresden_dt = dresden_dt.merge(gene_annot_dt, on="gene_name", how="left")
 
 dresden_dt["geneID"] = dresden_dt["gene_id"]
+
+
 
 # Add CGC roles
 dresden_dt_cgc = dresden_dt.merge(cgc[["geneID", "ROLE_IN_CANCER"]], on="geneID", how="left")
@@ -93,8 +122,12 @@ extended_dresden_list = [
 extended_dresden_dt = pd.DataFrame({"gene_name": extended_dresden_list})
 extended_dresden_dt["extended_predisposition_gene"] = True
 extended_dresden_dt = extended_dresden_dt.merge(gene_annot_dt, on="gene_name", how="left")
-
 extended_dresden_dt["geneID"] = extended_dresden_dt["gene_id"]
+
+
+for name, ensg in gene_map.items():
+    extended_dresden_dt.loc[extended_dresden_dt["gene_name"] == name, "geneID_short"] = ensg
+
 extended_dresden_dt_cgc = extended_dresden_dt.merge(cgc[["geneID", "ROLE_IN_CANCER"]], on="geneID", how="left")
 
 extended_dresden_dt_cgc["Predisposition"] = "Extended list"
@@ -102,8 +135,48 @@ extended_dresden_dt_cgc.loc[extended_dresden_dt_cgc["gene_name"].isin(dresden_dt
 
 
 
-cgc["Predisposition"] = False
+cgc["Predisposition"] = "None"
 cgc.loc[cgc["geneID_short"].isin(extended_dresden_dt["geneID_short"]), "Predisposition"] = "Extended predisp"
 cgc.loc[cgc["geneID_short"].isin(dresden_dt["geneID_short"]), "Predisposition"] = "Predisposition"
 
 
+cgc["cgc"] = True
+
+
+
+inheritence_df = pd.read_excel("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/supp_table_inheritenx.xlsx", sheet_name=0 )
+inheritence_df.columns = inheritence_df.iloc[1]
+
+# 2. Slice the dataframe to keep everything from the third row (index 2) onwards
+inheritence_df = inheritence_df.iloc[2:]
+
+
+inheritence_df = inheritence_df.reset_index(drop=True)
+
+inheritence_df = inheritence_df.merge(gene_annot_dt, right_on="gene_name", left_on="Approved symbol (HGNC)", how="left")
+
+AD_inheritence = inheritence_df[inheritence_df["Inheritance cancer predisposition"].str.contains("AD")]
+
+
+
+dresden_slice = extended_dresden_dt[["gene_name", "geneID_short", "extended_predisposition_gene"]].copy()
+
+# 2. Assign the boolean flag cleanly
+dresden_slice["predisposition"] = dresden_slice["gene_name"].isin(dresden_list)
+
+# 3. Select only the necessary CGC columns
+cgc_subset = cgc[["cgc", "geneID_short", "GENE_SYMBOL", "NAME", "TUMOUR_TYPES_GERMLINE", "TISSUE_TYPE", "ROLE_IN_CANCER"]]
+
+# 4. Use an outer join to combine everything in one go
+genes_of_interest = pd.merge(dresden_slice, cgc_subset, on="geneID_short", how="outer")
+
+
+genes_of_interest = genes_of_interest.merge(inheritence_df[["Evidence for cancer predisposition", "Inheritance cancer predisposition", "geneID_short", "gene_type"]], on="geneID_short", how="outer")
+
+
+name_mapping = gene_annot_dt.drop_duplicates("geneID_short").set_index("geneID_short")["gene_name"]
+
+# 2. Fill the NaNs in genes_of_interest['gene_name'] using that mapping
+genes_of_interest["gene_name"] = genes_of_interest["gene_name"].fillna(
+    genes_of_interest["geneID_short"].map(name_mapping)
+)

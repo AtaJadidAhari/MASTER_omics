@@ -1,7 +1,5 @@
 import pandas as pd
-from itables import init_notebook_mode
 import plotnine as pn
-init_notebook_mode(all_interactive=True)
 import numpy as np
 
 
@@ -70,28 +68,36 @@ def _false_discovery_control(ps, *, axis=0, method='bh'):
     return np.clip(ps, 0, 1)
 
 
-or_res = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants.parquet")
-
-or_res_predispostion = or_res[or_res["geneID"].isin(dresden_dt["geneID"])]
-
-or_res_predispostion['padjust_predisp'] = _false_discovery_control(or_res_predispostion['pValue'].values, method='bh')
-
-or_res = or_res.merge(or_res_predispostion[["sampleID", "geneID", "padjust_predisp"]], how="left", on=["sampleID", "geneID"])
+or_res = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust_cnv.parquet")
 
 
+# or_res_predispostion = or_res[or_res["geneID"].isin(dresden_dt["geneID"])]
 
-or_res_predispostion_extended = or_res[or_res["geneID_short"].isin(extended_dresden_dt["geneID_short"])]
-or_res_predispostion_extended['padjust_predisp_extended'] = _false_discovery_control(or_res_predispostion_extended['pValue'].values, method='bh')
-or_res = or_res.merge(or_res_predispostion_extended[["sampleID", "geneID", "padjust_predisp_extended"]], how="left", on=["sampleID", "geneID"])
+# or_res_predispostion['padjust_predisp'] = _false_discovery_control(or_res_predispostion['pValue'].values, method='bh')
+
+# or_res = or_res.merge(or_res_predispostion[["sampleID", "geneID", "padjust_predisp"]], how="left", on=["sampleID", "geneID"])
 
 
 
-or_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust.parquet", index=None)
+# or_res_predispostion_extended = or_res[or_res["geneID_short"].isin(extended_dresden_dt["geneID_short"])]
+# or_res_predispostion_extended['padjust_predisp_extended'] = _false_discovery_control(or_res_predispostion_extended['pValue'].values, method='bh')
+# or_res = or_res.merge(or_res_predispostion_extended[["sampleID", "geneID", "padjust_predisp_extended"]], how="left", on=["sampleID", "geneID"])
 
 
 
-py_or_res_aberrant = or_res[(or_res["padjust"] <= 0.05) | (or_res["padjust_predisp"] <= 0.05) | (or_res["padjust_predisp_extended"] <= 0.05)]
+# or_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust.parquet", index=None)
 
 
-py_or_res_aberrant.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_outliers.parquet", index=None)
 
+# py_or_res_aberrant = or_res[(or_res["padjust"] <= 0.05) | (or_res["padjust_predisp"] <= 0.05) | (or_res["padjust_predisp_extended"] <= 0.05)]
+
+
+# py_or_res_aberrant.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_outliers.parquet", index=None)
+
+
+or_res_predispostion = or_res[or_res["geneID_short"].isin(genes_of_interest["geneID_short"])]
+
+or_res_predispostion['padjust_genes_of_interest'] = _false_discovery_control(or_res_predispostion['pValue'].values, method='bh')
+
+or_res = or_res.merge(or_res_predispostion[["sampleID", "geneID", "padjust_genes_of_interest"]], how="left", on=["sampleID", "geneID"])
+or_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_interesting_genes_padjust_cnv.parquet", index=None)

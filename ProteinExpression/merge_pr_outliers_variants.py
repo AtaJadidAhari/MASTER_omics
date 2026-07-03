@@ -7,7 +7,7 @@ from utils.load_gtf_cgc_dresden import *
 from ProteinExpression.load_pr_data import *
 
 #pr_output_name = "cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA"
-pr_output_name = "zScore_gt3"
+pr_output_name = "sf_zScores"
 
 pr_res_all = load_pr_data("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/protrider_summary.csv")
 

@@ -34,89 +34,89 @@ cnv_germline = cnv_germline.drop_duplicates(subset=["sampleID", "geneID_short"])
 
 
 
-# py_or_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust.parquet")
-py_or_res_all = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/zscores/or_variants.csv")
+# # py_or_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust.parquet")
+# py_or_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/pyoutrider_zscores/or_variants.parquet")
 
-cols = py_or_res_all.columns
-final_cols = cols.to_list() + ["CNV"]
-print(len(py_or_res_all))
-# # Replace NaN with empty strings before concatenating
-
-
-merged_df = pd.merge(
-    py_or_res_all, 
-    cnv, 
-    on=['geneID_short', 'sampleID'], 
-    how='left'
-)
-merged_df = pd.merge(
-    merged_df, 
-    cnv_germline, 
-    on=['geneID_short', 'sampleID'], 
-    how='left'
-)
-merged_df[ (merged_df["zScore"] > 0)]["Type_x"].value_counts()
+# cols = py_or_res_all.columns
+# final_cols = cols.to_list() + ["CNV"]
+# print(len(py_or_res_all))
+# # # Replace NaN with empty strings before concatenating
 
 
-
-
-merged_df["Type_x"] = [f"Somatic_{x}" if pd.notna(x) and x != "" else "" for x in merged_df["Type_x"]]
-
-# Clean Germline labels
-merged_df["Type_y"] = [f"Germline_{y}" if pd.notna(y) and y != "" else "" for y in merged_df["Type_y"]]
-
-
-
-merged_df["CNV"] = merged_df.apply(join_types, axis=1)
-
-
-
-merged_df[final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/zscores/or_variants_cnv.parquet", index=False)
-
-# merged_df[final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust_cnv.parquet", index=False)
-
-
-print(len(merged_df))
-sys.exit()
-
-
-# pr_output_name = "cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA"
-# # pr_output_name = "zScore_gt3"
-
-# pr_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust.parquet")
-# # pr_res_all = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants.csv")
-
-# pr_cols = pr_res_all.columns.to_list()
-# pr_final_cols = pr_cols + ["CNV"]
-
-# print(len(pr_res_all))
-
-# pr_merged_df = pd.merge(
-#     pr_res_all, 
+# merged_df = pd.merge(
+#     py_or_res_all, 
 #     cnv, 
-#     on=['geneID_short', 'sampleID'],
+#     on=['geneID_short', 'sampleID'], 
 #     how='left'
 # )
-
-# pr_merged_df = pd.merge(
-#     pr_merged_df, 
+# merged_df = pd.merge(
+#     merged_df, 
 #     cnv_germline, 
 #     on=['geneID_short', 'sampleID'], 
 #     how='left'
 # )
-# # Replace NaN with empty strings before concatenating
+# merged_df[ (merged_df["zScore"] > 0)]["Type_x"].value_counts()
 
 
-# pr_merged_df["Type_x"] = [f"Somatic_{x}" if pd.notna(x) and x != "" else "" for x in pr_merged_df["Type_x"]]
+
+
+# merged_df["Type_x"] = [f"Somatic_{x}" if pd.notna(x) and x != "" else "" for x in merged_df["Type_x"]]
 
 # # Clean Germline labels
-# pr_merged_df["Type_y"] = [f"Germline_{y}" if pd.notna(y) and y != "" else "" for y in pr_merged_df["Type_y"]]
+# merged_df["Type_y"] = [f"Germline_{y}" if pd.notna(y) and y != "" else "" for y in merged_df["Type_y"]]
 
 
-# pr_merged_df["CNV"] = pr_merged_df.apply(join_types, axis=1)
-# pr_merged_df[pr_final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust_cnv.parquet", index=False)
 
-# print(len(pr_merged_df))
+# merged_df["CNV"] = merged_df.apply(join_types, axis=1)
+
+
+
+# merged_df[final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/pyoutrider_zscores/or_variants_cnv.parquet", index=False)
+
+# # merged_df[final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_predisppadjust_cnv.parquet", index=False)
+
+
+# print(len(merged_df))
+# sys.exit()
+
+
+# pr_output_name = "cov_gaussian_gs_lr_0_001_epoc2000_noInitPCA"
+pr_output_name = "sf_zScores"
+
+# pr_res_all = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust.parquet")
+pr_res_all = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants.csv")
+
+pr_cols = pr_res_all.columns.to_list()
+pr_final_cols = pr_cols + ["CNV"]
+
+print(len(pr_res_all))
+
+pr_merged_df = pd.merge(
+    pr_res_all, 
+    cnv, 
+    on=['geneID_short', 'sampleID'],
+    how='left'
+)
+
+pr_merged_df = pd.merge(
+    pr_merged_df, 
+    cnv_germline, 
+    on=['geneID_short', 'sampleID'], 
+    how='left'
+)
+# Replace NaN with empty strings before concatenating
+
+
+pr_merged_df["Type_x"] = [f"Somatic_{x}" if pd.notna(x) and x != "" else "" for x in pr_merged_df["Type_x"]]
+
+# Clean Germline labels
+pr_merged_df["Type_y"] = [f"Germline_{y}" if pd.notna(y) and y != "" else "" for y in pr_merged_df["Type_y"]]
+
+
+pr_merged_df["CNV"] = pr_merged_df.apply(join_types, axis=1)
+pr_merged_df[pr_final_cols].to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/protrider_runs/output_" + pr_output_name + "/pr_variants_predisppadjust_cnv.parquet", index=False)
+
+print(len(pr_merged_df))
 
 
 

@@ -205,149 +205,153 @@ def plot_variant_proportions(plot_data, plot_title = "OUTRIDER", expression_dire
     )
 
 
-py_or_res_all = calculate_proportions(py_or_res_all, expression_col="CNV")
-py_or_res_all = calculate_proportions(py_or_res_all, expression_col="VEP")
+# py_or_res_all = calculate_proportions(py_or_res_all, expression_col="CNV")
+# py_or_res_all = calculate_proportions(py_or_res_all, expression_col="VEP")
 
-print(py_or_res_all.columns)
+# print(py_or_res_all.columns)
 
-# underexpression outrider
-p = plot_variant_proportions(
-    py_or_res_all, plot_title="OUTRIDER (across all genes)", expression_direction="underexpression")
-p.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
+# # underexpression outrider
+# p = plot_variant_proportions(
+#     py_or_res_all, plot_title="OUTRIDER (across all genes)", expression_direction="underexpression")
+# p.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
 
 
 
-gene_zscore = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/zscores/or_variants_cnv.parquet",)
+gene_zscore = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/pyoutrider_zscores/or_variants_cnv.parquet",)
 gene_zscore = pd.merge(gene_zscore, sa[["pid", "Diag", "seq_type", "Oncotree Code"]], left_on="sampleID", right_on="pid")
 gene_zscore["Method"] = "sf-normalized zScores"
 gene_zscore = gene_zscore.drop_duplicates(subset=["geneID_short", "sampleID"])
 
 
-gene_zscore = calculate_proportions(gene_zscore, "CNV")
-gene_zscore = calculate_proportions(gene_zscore, "VEP")
+# gene_zscore = calculate_proportions(gene_zscore, "CNV")
+# gene_zscore = calculate_proportions(gene_zscore, "VEP")
 
 
-# underexpression zscore
-p2 = plot_variant_proportions(
-    gene_zscore, plot_title="sf-normalized zScores (across all genes)", expression_direction="underexpression")
-p2.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_underexpression_outliers_sf_normalized_zscores.png", width=6, height=4, dpi=300)
+# # underexpression zscore
+# p2 = plot_variant_proportions(
+#     gene_zscore, plot_title="sf-normalized zScores (across all genes)", expression_direction="underexpression")
+# p2.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_underexpression_outliers_sf_normalized_zscores.png", width=6, height=4, dpi=300)
 
 
 
-# overexpression outrider
-p3 = plot_variant_proportions(
-    py_or_res_all, plot_title="OUTRIDER (across all genes)", expression_direction="overexpression")
-p3.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_overexpression_outliers.png", width=6, height=4, dpi=300)
+# # overexpression outrider
+# p3 = plot_variant_proportions(
+#     py_or_res_all, plot_title="OUTRIDER (across all genes)", expression_direction="overexpression")
+# p3.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_overexpression_outliers.png", width=6, height=4, dpi=300)
 
 
-# overexpression zscore
-p3 = plot_variant_proportions(
-    gene_zscore, plot_title="sf-normalized zScores (across all genes)", expression_direction="overexpression")
-p3.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_overexpression_outliers_sf_normalized_zscores.png", width=6, height=4, dpi=300)
+# # overexpression zscore
+# p3 = plot_variant_proportions(
+#     gene_zscore, plot_title="sf-normalized zScores (across all genes)", expression_direction="overexpression")
+# p3.save("/home/a379i/Scripts/AberrantExpression/proportions_all_genes_overexpression_outliers_sf_normalized_zscores.png", width=6, height=4, dpi=300)
 
 
-# predispostions
+# # predispostions
 py_or_res_predisp = py_or_res_all[py_or_res_all["padjust_predisp_extended"].notna()]
 py_or_res_predisp = py_or_res_predisp.sort_values("padjust_predisp_extended")
 
 gene_zscore_predisp = gene_zscore[gene_zscore["geneID_short"].isin(extended_dresden_dt["geneID_short"])]
 
 
-gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "CNV_VEP")
-gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "CNV")
-gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "VEP")
+# gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "CNV_VEP")
+# gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "CNV")
+# gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "VEP")
 
 
 
-py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV")
-py_or_res_predisp = calculate_proportions(py_or_res_predisp, "VEP")
+# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV")
+# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "VEP")
+# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV_VEP")
+
+
+# p4 = plot_variant_proportions(
+#     py_or_res_predisp, plot_title="OUTRIDER (only predispostion genes)", expression_direction="underexpression")
+# p4.save("/home/a379i/Scripts/AberrantExpression/proportions_predisposition_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
+
+
+# p5 = plot_variant_proportions(
+#     py_or_res_predisp, plot_title="OUTRIDER (only predispostion genes)", expression_direction="overexpression")
+# p5.save("/home/a379i/Scripts/AberrantExpression/proportions_predisposition_genes_overexpression_outliers.png", width=6, height=4, dpi=300)
+
+
+
+# zScores vs OUTRIDER: both CNV and VEP_HIGH
+
+# py_or_res_all = calculate_proportions(py_or_res_all, "CNV_VEP")
+# gene_zscore = calculate_proportions(gene_zscore, "CNV_VEP")
+
+
+
+# plot_dt = pd.concat([py_or_res_all, gene_zscore])
+
+
+
+# for expression_direction in ["underexpression", "overexpression"]:
+
+#     if expression_direction == "underexpression":
+#             plot_data = plot_dt[plot_dt["zScore"] < 0]
+#             CNV_label = "Deletion CNV"
+#             CNV_label = "AMP/DUP CNV"
+#     else:
+#         plot_data = plot_dt[plot_dt["zScore"] > 0]
+
+
+#     p = ( pn.ggplot(plot_data[(plot_data[f"{expression_direction}_rank"] > 100) & 
+#                                     (plot_data[f"{expression_direction}_rank"] < 1e10)])
+                
+#                 # --- Line 1 (Deletion) ---
+#                 # We map 'color' to a string label. Plotnine sees this as a category.
+#                 + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
+#                                     y=f"{expression_direction}_proportions_CNV_VEP", 
+#                                     color="Method")) 
+#                 + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
+#                                         ymin=f"{expression_direction}_ci_min_CNV_VEP", ymax=f"{expression_direction}_ci_max_CNV_VEP", 
+#                                         fill="Method"), 
+#                                 alpha=0.2, outline_type='none')
+                
+            
+#                 + pn.scale_x_log10()
+#                 + pn.annotation_logticks(sides="b")
+#                 + pn.labs(
+#                     y=f"Proportion of {expression_direction} outliers\nwith variants (Rare SNV/indel and CNV)",
+#                     x="Outlier rank cutoff",
+#                     title="Across all genes"
+#                 )
+#                 + pn.theme_bw(base_size=12)
+#     )
+
+#     p.save(f"/home/a379i/Scripts/AberrantExpression/proportions_{expression_direction}_or_vs_zScore.png", width=6, height=4, dpi=300)
+
+#     p = ( pn.ggplot(plot_data[(plot_data["Method"] == "OUTRIDER") & (plot_data[f"{expression_direction}_rank"] > 100) & 
+#                                     (plot_data[f"{expression_direction}_rank"] < 1e10)])
+                
+#                 # --- Line 1 (Deletion) ---
+#                 # We map 'color' to a string label. Plotnine sees this as a category.
+#                 + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
+#                                     y=f"{expression_direction}_proportions_CNV_VEP", 
+#                                     )) 
+#                 + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
+#                                         ymin=f"{expression_direction}_ci_min_CNV_VEP", ymax=f"{expression_direction}_ci_max_CNV_VEP"), 
+#                                 alpha=0.2, outline_type='none')
+                
+            
+#                 + pn.scale_x_log10()
+#                 + pn.annotation_logticks(sides="b")
+#                 + pn.labs(
+#                     y=f"Proportion of {expression_direction} outliers\nwith variants (Rare SNV/indel and CNV)",
+#                     x="Outlier rank cutoff",
+#                     title="Across all genes"
+#                 )
+#                 + pn.theme_bw(base_size=12)
+#     )
+
+#     p.save(f"/home/a379i/Scripts/AberrantExpression/proportions_{expression_direction}_vep_cnv.png", width=6, height=4, dpi=300)
+
+# zScores vs OUTRIDER: both CNV and VEP_HIGH
+
+
 py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV_VEP")
-
-
-p4 = plot_variant_proportions(
-    py_or_res_predisp, plot_title="OUTRIDER (only predispostion genes)", expression_direction="underexpression")
-p4.save("/home/a379i/Scripts/AberrantExpression/proportions_predisposition_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
-
-
-p5 = plot_variant_proportions(
-    py_or_res_predisp, plot_title="OUTRIDER (only predispostion genes)", expression_direction="overexpression")
-p5.save("/home/a379i/Scripts/AberrantExpression/proportions_predisposition_genes_overexpression_outliers.png", width=6, height=4, dpi=300)
-
-
-
-# zScores vs OUTRIDER: both CNV and VEP_HIGH
-
-py_or_res_all = calculate_proportions(py_or_res_all, "CNV_VEP")
-gene_zscore = calculate_proportions(gene_zscore, "CNV_VEP")
-
-
-
-plot_dt = pd.concat([py_or_res_all, gene_zscore])
-
-
-
-for expression_direction in ["underexpression", "overexpression"]:
-
-    if expression_direction == "underexpression":
-            plot_data = plot_dt[plot_dt["zScore"] < 0]
-            CNV_label = "Deletion CNV"
-            CNV_label = "AMP/DUP CNV"
-    else:
-        plot_data = plot_dt[plot_dt["zScore"] > 0]
-
-
-    p = ( pn.ggplot(plot_data[(plot_data[f"{expression_direction}_rank"] > 100) & 
-                                    (plot_data[f"{expression_direction}_rank"] < 1e10)])
-                
-                # --- Line 1 (Deletion) ---
-                # We map 'color' to a string label. Plotnine sees this as a category.
-                + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
-                                    y=f"{expression_direction}_proportions_CNV_VEP", 
-                                    color="Method")) 
-                + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
-                                        ymin=f"{expression_direction}_ci_min_CNV_VEP", ymax=f"{expression_direction}_ci_max_CNV_VEP", 
-                                        fill="Method"), 
-                                alpha=0.2, outline_type='none')
-                
-            
-                + pn.scale_x_log10()
-                + pn.annotation_logticks(sides="b")
-                + pn.labs(
-                    y=f"Proportion of {expression_direction} outliers\nwith variants (Rare SNV/indel and CNV)",
-                    x="Outlier rank cutoff",
-                    title="Across all genes"
-                )
-                + pn.theme_bw(base_size=12)
-    )
-
-    p.save(f"/home/a379i/Scripts/AberrantExpression/proportions_{expression_direction}_or_vs_zScore.png", width=6, height=4, dpi=300)
-
-    p = ( pn.ggplot(plot_data[(plot_data["Method"] == "OUTRIDER") & (plot_data[f"{expression_direction}_rank"] > 100) & 
-                                    (plot_data[f"{expression_direction}_rank"] < 1e10)])
-                
-                # --- Line 1 (Deletion) ---
-                # We map 'color' to a string label. Plotnine sees this as a category.
-                + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
-                                    y=f"{expression_direction}_proportions_CNV_VEP", 
-                                    )) 
-                + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
-                                        ymin=f"{expression_direction}_ci_min_CNV_VEP", ymax=f"{expression_direction}_ci_max_CNV_VEP"), 
-                                alpha=0.2, outline_type='none')
-                
-            
-                + pn.scale_x_log10()
-                + pn.annotation_logticks(sides="b")
-                + pn.labs(
-                    y=f"Proportion of {expression_direction} outliers\nwith variants (Rare SNV/indel and CNV)",
-                    x="Outlier rank cutoff",
-                    title="Across all genes"
-                )
-                + pn.theme_bw(base_size=12)
-    )
-
-    p.save(f"/home/a379i/Scripts/AberrnatExpression/proportions_{expression_direction}_vep_cnv.png", width=6, height=4, dpi=300)
-
-# zScores vs OUTRIDER: both CNV and VEP_HIGH
+gene_zscore_predisp = calculate_proportions(gene_zscore_predisp, "CNV_VEP")
 
 plot_dt = pd.concat([gene_zscore_predisp, py_or_res_predisp])
 
@@ -412,4 +416,4 @@ for expression_direction in ["underexpression", "overexpression"]:
                 + pn.theme_bw(base_size=12)
     )
 
-    p.save(f"/home/a379i/Scripts/AberrnatExpression/proportions_predisp{expression_direction}_vep_cnv.png", width=6, height=4, dpi=300)
+    p.save(f"/home/a379i/Scripts/AberrantExpression/proportions_predisp_{expression_direction}_vep_cnv.png", width=6, height=4, dpi=300)

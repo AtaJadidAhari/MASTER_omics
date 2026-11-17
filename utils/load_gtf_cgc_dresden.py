@@ -1,4 +1,7 @@
 import pandas as pd
+import polars.selectors as cs
+
+
 
 
 sa = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/master_drop_sample_annotation_sizeFactorFiltered_0.1.tsv", sep="\t")
@@ -180,3 +183,6 @@ name_mapping = gene_annot_dt.drop_duplicates("geneID_short").set_index("geneID_s
 genes_of_interest["gene_name"] = genes_of_interest["gene_name"].fillna(
     genes_of_interest["geneID_short"].map(name_mapping)
 )
+
+
+tier3_genes = genes_of_interest[(genes_of_interest["cgc"].isna()) | (genes_of_interest["ROLE_IN_CANCER"].str.contains("TSG"))]

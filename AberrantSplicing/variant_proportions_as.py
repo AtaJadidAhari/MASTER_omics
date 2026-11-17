@@ -32,14 +32,59 @@ from utils.load_gtf_cgc_dresden import *
 from ProteinExpression.load_pr_data import *
 
 # %%
-
-
 from scipy.integrate import trapezoid
+
+
+
+## load variants
+
+dresden_somatic = (pl.scan_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/somatic_aggregated_predisp_cgc.parquet")
+                    .with_columns(
+                            cs.starts_with("SpliceAI_pred_DS_").cast(pl.Float64, strict=False)
+                    )
+                   .filter(
+                           (pl.col("somatic_abexp_v1.1").abs() >= 0.1) | (pl.col("somatic_promoterAI").abs() >= 0.1) | (pl.col("somatic_IMPACT").str.contains("HIGH")) |
+                            (pl.col("SpliceAI_pred_DS_AL") >= 0.1) |  
+                               (pl.col("SpliceAI_pred_DS_AG") >= 0.1) | 
+                                (pl.col("SpliceAI_pred_DS_DG") >= 0.1) | 
+                                (pl.col("SpliceAI_pred_DS_DL") >= 0.1)
+                          )
+                    .collect(engine="streaming")
+                    
+                  ).to_pandas().drop(columns=["ref", "ref"])
+# dresden_somatic
+
+
+
+dresden_germline = (pl.scan_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/germline_aggregated_predisp_cgc_tinda.parquet")
+                    .with_columns(
+                            cs.starts_with("SpliceAI_pred_DS_").cast(pl.Float64, strict=False)
+                    ).filter((pl.col("PID").is_in(sa["pid"])) & (
+                               (pl.col("germline_abexp_v1.1").abs() >= 0.1) | (pl.col("germline_promoterAI").abs() >= 0.1) | (pl.col("germline_IMPACT").str.contains("HIGH")) | 
+                              (pl.col("SpliceAI_pred_DS_AL") >= 0.1) | 
+                                (pl.col("SpliceAI_pred_DS_AG") >= 0.1) | 
+                                (pl.col("SpliceAI_pred_DS_DG") >= 0.1) | 
+                                (pl.col("SpliceAI_pred_DS_DL") >= 0.1)
+                            )
+                          )
+                    .collect(engine="streaming")        
+                  ).to_pandas()
+
+
+dresden_germline["germline_max_spliceai_score"] = dresden_germline[["SpliceAI_pred_DS_AL", "SpliceAI_pred_DS_AG", 
+    "SpliceAI_pred_DS_DG", "SpliceAI_pred_DS_DL"
+]].max(axis=1)
+
+
+dresden_somatic["somatic_max_spliceai_score"] = dresden_somatic[["SpliceAI_pred_DS_AL", "SpliceAI_pred_DS_AG", 
+    "SpliceAI_pred_DS_DG", "SpliceAI_pred_DS_DL"
+]].max(axis=1)
+
+
 
 def get_auc_metrics(df, expression_direction="underexpression", log_scale=True):
     """
     Calculates Area Under the Curve (AUC) and Mean Proportion for variant enrichment.
-    
     If log_scale=True, the AUC represents the area as seen on a log-x plot.
     The 'mean_proportion' represents the average height of the curve over that range.
     """
@@ -67,7 +112,7 @@ def get_auc_metrics(df, expression_direction="underexpression", log_scale=True):
             y = subset[y_col].values
             
             # 1. Calculate Raw AUC (Trapezoidal Rule)
-            area = np.trapezoid(y, x)
+            area = np.trapz(y, x)
             
             # 2. Calculate Mean Proportion (Average Height)
             # This normalizes the area by the width of the plot
@@ -80,13 +125,11 @@ def get_auc_metrics(df, expression_direction="underexpression", log_scale=True):
             
     return results
 
-
-# %%
-def calculate_proportions(df, expression_col="CNV", expression_directions = ["overexpression", "underexpression"]):
+def calculate_proportions(df, expression_col="CNV", variant_type="germline", omic_type = "gene"):
     # Work on a copy to prevent SettingWithCopyWarning and index fragmentation
     df = df.copy()
     
-    for expression_direction in expression_directions:
+    for expression_direction in ["overexpression", "underexpression"]:
         vus_col = f"VUS_{expression_direction}_{expression_col}"
         df[vus_col] = False
 
@@ -95,14 +138,19 @@ def calculate_proportions(df, expression_col="CNV", expression_directions = ["ov
             if expression_direction == "underexpression":
                 if (df["Method"] == "sf-normalized zScores").any():
                     df = df.sort_values("zScore", ascending=True) 
-                df.loc[df[expression_col].str.contains("DEL", na=False), vus_col] = True
+                if variant_type == "germline":
+                    df.loc[df[expression_col].str.contains("Germline_DEL", na=False), vus_col] = True
+                else:
+                    df.loc[df[expression_col].str.contains("Somatic_HDEL", na=False), vus_col] = True
             else:
                 if (df["Method"] == "sf-normalized zScores").any():
                     df = df.sort_values("zScore", ascending=False)
                 df.loc[df[expression_col].str.contains("AMP|DUP", na=False), vus_col] = True
                 
         elif expression_col == "VEP":
-            df.loc[(df["IMPACT"] == "HIGH"), vus_col] = True
+            df.loc[(df[f"{variant_type}_IMPACT"].str.contains("HIGH")), vus_col] = True
+            if omic_type == "protein":
+                df.loc[(df[f"{variant_type}_Consequence"].str.contains("missense")), vus_col] = True
             
         elif expression_col == "CNV_VEP":
             # Combined logic: either high impact VEP or relevant CNV
@@ -127,12 +175,12 @@ def calculate_proportions(df, expression_col="CNV", expression_directions = ["ov
                 df.loc[(df["IMPACT"] == "HIGH"), vus_col] = True
 
         # 2. Subset based on zScore direction for proportion calculation
-        if expression_direction == "underexpression":
+        if expression_direction == "underexpression" and omic_type != "splicing":
             mask = df['zScore'] < 0
-        elif expression_direction == "overexpression":
+        elif omic_type != "splicing":
             mask = df['zScore'] > 0
-        else: # spcling outlier
-            mask = df["hgncSymbol"] == df["hgncSymbol"]
+        else:
+            mask = df.index.notna()
             
         # Create a temporary subset to calculate running statistics
         # This ensures we don't have indexing conflicts with the main DF
@@ -152,11 +200,14 @@ def calculate_proportions(df, expression_col="CNV", expression_directions = ["ov
 
             # Map the calculated values back to the original 'df' using the mask
             df.loc[mask, f"{expression_direction}_rank"] = u_rank
-            df.loc[mask, f"{expression_direction}_proportions_{expression_col}"] = u_x / u_rank
-            df.loc[mask, f"{expression_direction}_ci_min_{expression_col}"] = ci_min
-            df.loc[mask, f"{expression_direction}_ci_max_{expression_col}"] = ci_max
+            df.loc[mask, f"{expression_direction}_proportions_{expression_col}_{variant_type}"] = u_x / u_rank
+            df.loc[mask, f"{expression_direction}_ci_min_{expression_col}_{variant_type}"] = ci_min
+            df.loc[mask, f"{expression_direction}_ci_max_{expression_col}_{variant_type}"] = ci_max
 
     return df
+    
+
+
 
 
 # %%
@@ -244,154 +295,53 @@ def plot_variant_proportions(plot_data, auc_dict, plot_title = "OUTRIDER", expre
 
 
 
-# ---
-# jupyter:
-#   jupytext:
-#     cell_metadata_filter: -all
-#     formats: ipynb,py:percent
-#     sync_on_save: true
-#     text_representation:
-#       extension: .py
-#       format_name: percent
-#       format_version: '1.3'
-#       jupytext_version: 1.19.1
-# ---
+all_res = []
+# padjust_Genes_with_rare_splice_variants
+for cohort in sa[sa["Diag"] != "Unstranded_data"]["Diag"].unique():
+    # if cohort == "Other":
+    #     splicing_res_path = f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_per_junction.tsv"
+    # else:
+    #     splicing_res_path = f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_per_junction_dna_first.tsv"
+    #| (pl.col("padjust_Genes_with_rare_splice_variants") <= 0.1)
+    splicing_res_path = f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all.tsv.gz"
+    fr_res_new =( pl.scan_csv(splicing_res_path, 
+                                schema_overrides={
+                                    "deltaPsi": pl.Float64,
+                                    "seqnames": pl.String,
+                                    "padjust_Genes_with_rare_splice_variants": pl.Float64,
+                                }, 
+                                null_values=["NA"],
+                                 separator="\t")
+                    #.select("sampleID", "hgncSymbol", "pValue", "padjust", 'seqnames', 'start', 'end', 'strand', 'deltaPsi', 'counts', 'totalCounts', 'nonsplitCounts')
+                    .filter(pl.col("pValue") < 0.5)
+                    .filter(pl.col("hgncSymbol").is_in(genes_of_interest["gene_name"]))
+                    .collect(engine="streaming")
+                    ).rename({"start": "junction_start", "end": "junction_end"}).to_pandas()
+    # fr_res_new[(fr_res_new["padjust"] <= 0.05) & (fr_res_new["padjust_Genes_to_test_on_all_samples"].notna())]
+    fr_res_new = fr_res_new.merge(sa, left_on="sampleID", right_on="pid")
+    all_res.append(fr_res_new)
+all_res = pd.concat(all_res)
 
-# %%
-import pandas as pd
-import plotnine as pn
-import numpy as np
-from scipy.stats import beta
-from itables import init_notebook_mode
-import polars as pl
-import os
+print(all_res.shape, "all splicing outliers")
+print(all_res["hgncSymbol"].unique())
 
-# %%
-init_notebook_mode(all_interactive=True)
-
-# %%
-import sys
-sys.path.append("/home/a379i/Scripts")   # path to folder containing the python file
-
-# %%
-from utils.load_gtf_cgc_dresden import *
-from ProteinExpression.load_pr_data import *
-
-# %%
-
-somatic_snvs = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/cnv/somatic_snvs_vep_annotated.parquet")
-
-sa = pd.read_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/sample_data/master_drop_sample_annotation_sizeFactorFiltered_0.1.tsv", sep="\t")
+splicing_outliers_merged = all_res.merge(dresden_germline,  right_on=["PID", "SYMBOL"], left_on=["sampleID", "hgncSymbol"], how="left")
+splicing_outliers_merged = splicing_outliers_merged.merge(dresden_somatic,  right_on=["PID", "SYMBOL"], left_on=["sampleID", "hgncSymbol"], how="left")
 
 
 
-fr_res =  pl.scan_csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/aggregated_results_gene_all_variants.tsv", separator="\t").filter(pl.col("geneID_short").is_in(genes_of_interest["geneID_short"])).collect(engine="streaming").to_pandas()
-
-fr_res = pd.merge(fr_res, sa, left_on="sampleID", right_on="pid")
-fr_res["Method"] = "FRASER2"
-
-print(len(fr_res), "total_number of outliers")
-
-# fr_res = fr_res[fr_res["geneID_short"].isin(genes_of_interest["geneID_short"])]
-
-print(len(fr_res), "total_number of outliers in genesa of interest")
-
-fr_res = fr_res.merge(somatic_snvs[["somatic_snv_#Uploaded_variation", "sampleID", "MASTER_annotated_gene", "vep_Gene", "somatic_snv_IMPACT", "somatic_snv_Consequence", "somatic_snv_max_spliceai_score", "somatic_snv_am_pathogenicity", "somatic_snv_AbSplice2_max", "somatic_snv_promoterAI", "somatic_snv_abexp_v1.1"]] , left_on=["geneID_short", "sampleID"], right_on=["vep_Gene", "sampleID"], how="left")
+splicing_outliers_merged["germline_somatic_IMPACT"] = "False"
+splicing_outliers_merged.loc[(splicing_outliers_merged["germline_IMPACT"].notna()) | (splicing_outliers_merged["somatic_IMPACT"].notna()), "germline_somatic_IMPACT"] = "HIGH"
 
 
+splicing_outliers_merged["CNV"] = "No CNV"
 
-gene_annot_pl = pl.from_pandas(gene_annot_dt[["gene_name", "geneID_short"]])
+splicing_outliers_merged = splicing_outliers_merged.drop_duplicates(subset=["sampleID", "junction_start", "junction_end", "hgncSymbol"])
+splicing_outliers_merged = splicing_outliers_merged.sort_values("pValue")
+splicing_outliers_merged["Method"] = "FRASER"
 
-germline_snvs = (
-    pl.scan_parquet(
-        "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/cnv/germline_predisp_cgc_all_TINDA.parquet"
-    )
-    # Apply all filters first to reduce data size
-    .filter(
-        (pl.col("sampleID").is_in(fr_res["sampleID"]))
-    )
-    # Perform the join within Polars using join_as_coerced
-    .join(
-        gene_annot_pl.lazy(), left_on="HUGO_Symbol", right_on="gene_name", how="inner"
-    )
-    .filter(pl.col("geneID_short").is_in(genes_of_interest["geneID_short"]))
-    # Collect using the streaming engine and convert to Pandas
-    .collect(engine="streaming")
-    .to_pandas()
-)
+print(splicing_outliers_merged.shape, "splicng outliers after merging with variants")
 
-
-germline_snvs = germline_snvs.rename(columns={"#CHROM": "seqnames", "REF": "Ref", "ALT": "Alt"})
-print(germline_snvs.shape)
-
-germline_snvs = germline_snvs[(germline_snvs["Ref"].str.len() == 1) & (germline_snvs["Alt"].str.len() == 1)]
-germline_snvs["chrom"] = "chr" + germline_snvs["seqnames"]
-germline_snvs.shape
-
-valid_positions = (
-    germline_snvs["POS"]
-    .dropna()
-    .unique()
-    .astype(int)
-    .tolist()
-)
-
-
-germline_vep_res = pl.scan_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/cnv/germline_predisp_cgc_all_TINDA_vep.parquet",).collect(engine="streaming").to_pandas()
-
-
-germline_vep_res["chrom"] = germline_vep_res["Location"].str.split(":").str[0]
-germline_vep_res["POS"] = 0
-germline_vep_res.loc[germline_vep_res["VARIANT_CLASS"] == "SNV", "POS"] = germline_vep_res.loc[germline_vep_res["VARIANT_CLASS"] == "SNV", "Location"].str.split(":").str[1].astype(int)
-# germline_vep_res["POS"] = germline_vep_res["POS"] + 1
-germline_snvs = germline_snvs.merge(germline_vep_res[["chrom", "POS", "Allele", "REF_ALLELE", "IMPACT", "Consequence", "Gene", "#Uploaded_variation", "am_pathogenicity", "am_class", "LoF", "CADD_PHRED", "CADD_RAW","existing_InFrame_oORFs",  "existing_OutOfFrame_oORFs","existing_uORFs", "five_prime_UTR_variant_annotation", "five_prime_UTR_variant_consequence", "max_spliceai_score"]], left_on=["seqnames",  "POS", "Ref", "Alt", "geneID_short"], right_on=["chrom", "POS", "REF_ALLELE", "Allele", "Gene"], how="left") 
-
-
-absplice_predisp = (pl.scan_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/predisp_max_abSplice_snvs_hg19.parquet")
-        .filter((pl.col("hg19_end").is_in(valid_positions)))
-        .collect(engine="streaming")
-      ).to_pandas()
-absplice_predisp.shape
-
-
-
-merged_vars = germline_snvs.merge(absplice_predisp, left_on=["chrom_x", "POS", "Ref", "Alt"], right_on=["chrom", "hg19_end", "ref", "alt"], how="left")
-# merged_vars.loc[merged_vars["AbSplice2_max"].isna(), "AbSplice2_max"] = 0
-
-
-
-
-
-
-merged_vars["germline_splicing"] = False
-merged_vars.loc[(merged_vars["AbSplice2_max"] >= 0.1) | (merged_vars["IMPACT"].str.contains("spli")) | (merged_vars["Consequence"].isin(["splice_acceptor_variant", "splice_donor_variant"])) |     (merged_vars["max_spliceai_score"] >= 0.1) | (merged_vars["pangolin_score"] >= 0.1)  , "germline_splicing"] = True
-print(sum(merged_vars["germline_splicing"]), "germline_splicing merged_vars")
-
-
-fr_res_annotated = fr_res.merge(merged_vars, left_on=["sampleID", "geneID_short"], right_on=["sampleID", "geneID_short"], how="left")
-
-
-fr_res_annotated["germline_splicing"] = False
-fr_res_annotated.loc[(fr_res_annotated["AbSplice2_max"] >= 0.1) | (fr_res_annotated["Consequence"].str.contains("spli")) |(fr_res_annotated["Consequence"].isin(["splice_acceptor_variant", "splice_donor_variant"])) | (fr_res_annotated["max_spliceai_score"] >= 0.1) | (fr_res_annotated["pangolin_score"] >= 0.1)  , "germline_splicing"] = True
-
-
-fr_res_annotated["somatic_splicing"] = False
-fr_res_annotated.loc[(fr_res_annotated["somatic_snv_AbSplice2_max"] >= 0.05) | (fr_res_annotated["somatic_snv_Consequence"].str.contains("spli")) |(fr_res_annotated["somatic_snv_Consequence"].isin(["splice_acceptor_variant", "splice_donor_variant"])) | (fr_res_annotated["somatic_snv_max_spliceai_score"] >= 0.1) , "somatic_splicing"] = True
-
-
-
-fr_res_annotated["IMPACT"] = "False"
-fr_res_annotated.loc[(fr_res_annotated["germline_splicing"] == True) | (fr_res_annotated["somatic_splicing"] == True), "IMPACT"] = "HIGH"
-
-
-print(sum(fr_res_annotated["germline_splicing"]))
-print(sum(fr_res_annotated["somatic_splicing"]))
-
-print(len(fr_res_annotated[fr_res_annotated["IMPACT"] == "HIGH"]), "fr_res impact")
-
-fr_res_annotated["CNV"] = "No CNV"
-
-fr_res_annotated = fr_res_annotated.sort_values("pValue")
 
 # %%
 
@@ -399,108 +349,163 @@ fr_res_annotated = fr_res_annotated.sort_values("pValue")
 
 # %%
 # pr_res_all = calculate_proportions(pr_res_all, expression_col="CNV")
-fr_res_annotated = calculate_proportions(fr_res_annotated, expression_col="VEP", expression_directions = ["splicing"])
 
+omic_type = "splicing"
+plot_df = calculate_proportions(splicing_outliers_merged, "VEP", "germline_somatic",  omic_type=omic_type)
+plot_df["Variant_type"] = "Small germline or somatic"
 
-# %%
-
-
-# protrider_auc_underexpression = get_auc_metrics(pr_res_all)
-
-protrider_auc_overexpression = get_auc_metrics(fr_res_annotated, expression_direction="splicing")
-
-# %%
-print(fr_res_annotated.shape, "len protrider after adding proportions")
+plot_df = plot_df.rename(columns = {f"underexpression_proportions_VEP_germline_somatic": "underexpression_proportions"})
+plot_df = plot_df.rename(columns = {f"underexpression_ci_max_VEP_germline_somatic": "underexpression_ci_max"})
+plot_df = plot_df.rename(columns = {f"underexpression_ci_min_VEP_germline_somatic": "underexpression_ci_min"})
 
 # %%
-# p = plot_variant_proportions(
-#     fr_res_annotated, protrider_auc_overexpression, plot_title="FRASER", expression_direction="splicing")
-# p.save("/home/a379i/Scripts/AberrantSplicing/proportions_all_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
+plot_dt = plot_df.copy()
 
-# %%
+var_num_df = plot_dt.copy()
+var_num_df = var_num_df.drop_duplicates(subset=["sampleID", "hgncSymbol"])
+print(var_num_df.shape)
+
+plot_dt["facet_label"] = f"Splice disrupting variants \n VEP splice-related, SpliceAI ≥ 0.1,\nPangolin ≥ 0.1, AbSplice2 ≥ 0.1 (n={var_num_df[var_num_df["germline_somatic_IMPACT"] == "HIGH"].shape[0]})"
+
+#for expression_direction in ["underexpression", "overexpression"]:
+for expression_direction in ["underexpression"]:
+    if expression_direction == "underexpression" and omic_type != "splicing":
+            plot_data = plot_dt[plot_dt["zScore"] < 0]
+            CNV_label = "Deletion CNV"
+            CNV_label = "AMP CNV"
+    elif omic_type != "splicing":
+        plot_data = plot_dt[plot_dt["zScore"] > 0]
+    else:
+        plot_data = plot_dt.copy()
 
 
-plot_data = fr_res_annotated.copy()
-expression_direction = "splicing"
-p = ( pn.ggplot(plot_data[(plot_data["Method"] == "FRASER2") & (plot_data[f"{expression_direction}_rank"] > 100) & 
+    p = ( pn.ggplot(plot_data[(plot_data[f"{expression_direction}_rank"] > 100) & 
                                     (plot_data[f"{expression_direction}_rank"] < 1e10)])
                 
                 # --- Line 1 (Deletion) ---
                 # We map 'color' to a string label. Plotnine sees this as a category.
                 + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
-                                    y=f"{expression_direction}_proportions_VEP", 
+                                    y=f"{expression_direction}_proportions", 
                                     color="Method")) 
                 + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
-                                        ymin=f"{expression_direction}_ci_min_VEP", 
-                                        ymax=f"{expression_direction}_ci_max_VEP", 
+                                        ymin=f"{expression_direction}_ci_min", ymax=f"{expression_direction}_ci_max", 
                                         fill="Method"), 
                                 alpha=0.2, outline_type='none')
+                + pn.scale_fill_manual(values={
+                        "FRASER": "#fc8d59", 
+                    })
+                  + pn.scale_color_manual(values={
+                        "FRASER": "#fc8d59", 
+                    })
                 
-            
+                
+                + pn.facet_grid(". ~ facet_label")
                 + pn.scale_x_log10()
                 + pn.annotation_logticks(sides="b")
                 + pn.labs(
-                    y=f"Proportion of {expression_direction} outliers with \nrare splice-disrupting variants",
+                    y=f"Proportion of {omic_type} outliers\nwith rare SNV/indels",
                     x="Outlier rank cutoff",
-                    #title="Across all genes"
+                    title="Across tier 3 genes"
                 )
-                + pn.theme_bw(base_size=12)
+                + pn.theme_bw(base_size=17) 
+                + pn.theme(
+                    strip_text = pn.element_text(size=16),
+                    # Center multi-line y-axis title vertically
+                    axis_title_y=pn.element_text(ha='center'),
+                    # figure_size=(5, 5),
+                    plot_margin=0.05,
+                )
     )
 
+    p.save(f"/home/a379i/plots/ASHG_poster/splicing_proportions_cgc_predisp_vep_small_somatic_germline_fraser.png", width=8, height=5.4, dpi=300)
 
 
 
 
-p.save("/home/a379i/Scripts/AberrantSplicing/proportions_all_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
+
+splicing_outliers_merged["germline_somatic_IMPACT"] = "False"
+splicing_outliers_merged.loc[(splicing_outliers_merged["germline_IMPACT"].notna()), "germline_somatic_IMPACT"] = "HIGH"
+
+
+splicing_outliers_merged["CNV"] = "No CNV"
+
+splicing_outliers_merged = splicing_outliers_merged.drop_duplicates(subset=["sampleID", "junction_start", "junction_end", "hgncSymbol"])
+splicing_outliers_merged = splicing_outliers_merged.sort_values("pValue")
+splicing_outliers_merged["Method"] = "FRASER"
+
+print(splicing_outliers_merged.shape, "splicng outliers after merging with variants")
+
+
+
+
+omic_type = "splicing"
+plot_df = calculate_proportions(splicing_outliers_merged, "VEP", "germline_somatic",  omic_type=omic_type)
+plot_df["Variant_type"] = "Small germline or somatic"
+
+plot_df = plot_df.rename(columns = {f"underexpression_proportions_VEP_germline_somatic": "underexpression_proportions"})
+plot_df = plot_df.rename(columns = {f"underexpression_ci_max_VEP_germline_somatic": "underexpression_ci_max"})
+plot_df = plot_df.rename(columns = {f"underexpression_ci_min_VEP_germline_somatic": "underexpression_ci_min"})
 
 # %%
+plot_dt = plot_df.copy()
+
+var_num_df = plot_dt.copy()
+var_num_df = var_num_df.drop_duplicates(subset=["sampleID", "hgncSymbol"])
+print(var_num_df.shape)
+
+plot_dt["facet_label"] = f"Splice disrupting variants \n VEP splice-related, SpliceAI ≥ 0.1,\nPangolin ≥ 0.1, AbSplice2 ≥ 0.1 (n={var_num_df[var_num_df["germline_somatic_IMPACT"] == "HIGH"].shape[0]})"
+
+#for expression_direction in ["underexpression", "overexpression"]:
+for expression_direction in ["underexpression"]:
+    if expression_direction == "underexpression" and omic_type != "splicing":
+            plot_data = plot_dt[plot_dt["zScore"] < 0]
+            CNV_label = "Deletion CNV"
+            CNV_label = "AMP CNV"
+    elif omic_type != "splicing":
+        plot_data = plot_dt[plot_dt["zScore"] > 0]
+    else:
+        plot_data = plot_dt.copy()
 
 
+    p = ( pn.ggplot(plot_data[(plot_data[f"{expression_direction}_rank"] > 100) & 
+                                    (plot_data[f"{expression_direction}_rank"] < 1e10)])
+                
+                # --- Line 1 (Deletion) ---
+                # We map 'color' to a string label. Plotnine sees this as a category.
+                + pn.geom_line(pn.aes(x=f"{expression_direction}_rank", 
+                                    y=f"{expression_direction}_proportions", 
+                                    color="Method")) 
+                + pn.geom_ribbon(pn.aes(x=f"{expression_direction}_rank", 
+                                        ymin=f"{expression_direction}_ci_min", ymax=f"{expression_direction}_ci_max", 
+                                        fill="Method"), 
+                                alpha=0.2, outline_type='none')
+                + pn.scale_fill_manual(values={
+                        "FRASER": "#fc8d59", 
+                    })
+                  + pn.scale_color_manual(values={
+                        "FRASER": "#fc8d59", 
+                    })
+                
+                
+                + pn.facet_grid(". ~ facet_label")
+                + pn.scale_x_log10()
+                + pn.annotation_logticks(sides="b")
+                + pn.labs(
+                    y=f"Proportion of {omic_type} outliers\nwith rare SNV/indels",
+                    x="Outlier rank cutoff",
+                    title="Across tier 3 genes"
+                )
+                + pn.theme_bw(base_size=17) 
+                + pn.theme(
+                    strip_text = pn.element_text(size=16),
+                    # Center multi-line y-axis title vertically
+                    axis_title_y=pn.element_text(ha='center'),
+                    # figure_size=(5, 5),
+                    plot_margin=0.05,
+                )
+    )
 
+    p.save(f"/home/a379i/plots/ASHG_poster/splicing_proportions_cgc_predisp_vep_small_germline_fraser.png", width=8, height=5.4, dpi=300)
 
-
-
-
-
-# %%
-# predispostions
-# py_or_res_predisp = pr_res_all[pr_res_all["padjust_predisp_extended"].notna()]
-# py_or_res_predisp = py_or_res_predisp.sort_values("padjust_predisp_extended")
-
-
-
-# # %%
-# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV")
-# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "VEP")
-# py_or_res_predisp = calculate_proportions(py_or_res_predisp, "CNV_VEP")
-
-
-
-# protrider_auc_underexpression_predisp = get_auc_metrics(py_or_res_predisp)
-
-
-
-
-# # %%
-# p4 = plot_variant_proportions(
-#     py_or_res_predisp, protrider_auc_underexpression_predisp, plot_title="OUTRIDER (only predispostion genes)", expression_direction="underexpression")
-# p4.save("/home/a379i/Scripts/ProteinExpression/proportions_predisposition_genes_underexpression_outliers.png", width=6, height=4, dpi=300)
-
-
-# # %%
-# p5 = plot_variant_proportions(
-#     py_or_res_predisp, protrider_auc_overexpression_predisp, plot_title="OUTRIDER (only predisposition genes)", expression_direction="overexpression")
-# p5.save("/home/a379i/Scripts/ProteinExpression/proportions_predisposition_genes_overexpression_outliers.png", width=6, height=4, dpi=300)
-
-# # %%
-
-
-# # %% [markdown]
-# # zScores vs OUTRIDER: both CNV and VEP_HIGH
-
-# # %%
-# pr_res_all = calculate_proportions(pr_res_all, "CNV_VEP")
-
-# # %%
 
 

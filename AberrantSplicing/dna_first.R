@@ -3,7 +3,7 @@ library(dplyr)
 library(BiocParallel)
 
 setwd("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/")
-register(MulticoreParam(8))
+register(MulticoreParam(4))
 
 make_subsets_for_FDR_from_list <- function(genes, sampleIDs,
                                            subset_name = "Genes_to_test_on_all_samples") {
@@ -27,19 +27,31 @@ source("~/Scripts/utils/drop_utils.R")
 genes_to_subset <- extended_dresden_list
 
 cohort <- snakemake@params[["cohort"]]
-
 fds <- loadFraserDataSet(dir="/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/datasets", name=paste(cohort, "v19", sep = '--'))
 
-sample_ids <- colData(fds)$sampleID
 
-subsets <- make_subsets_for_FDR_from_list(
-    genes = extended_dresden_list,
-    sampleIDs = sample_ids
-)
-subsets <- subsets$Genes_to_test_on_all_samples
-s <- subsets[1]
+variant_data <- read.csv("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/splice_germline_vars_for_drop.csv", stringsAsFactors = FALSE) %>% as.data.table()
+sample_list <- variant_data[Diag == cohort,] %>%
+  group_by(PID) %>%
+  summarize(genes = list(unique(SYMBOL)), .groups = "drop") %>%
+  tibble::deframe()
 
-names(s) <- "Genes_to_test_on_all_samples"
+# 2. Wrap it so it has the exact parent name you want
+Genes_with_rare_splice_variants <- list(Genes_with_rare_splice_variants = sample_list)
+
+# sample_ids <- colData(fds)$sampleID
+
+# subsets <- make_subsets_for_FDR_from_list(
+#     genes = extended_dresden_list,
+#     sampleIDs = sample_ids
+# )
+# subsets <- subsets$Genes_to_test_on_all_samples
+# s <- subsets[1]
+
+# names(s) <- "Genes_to_test_on_all_samples"
+
+s <- Genes_with_rare_splice_variants
+names(s) <- "Genes_with_rare_splice_variants"
 
 type = "jaccard"
 fds <- calculatePadjValues(fds, type=type, subsets=s)
@@ -61,9 +73,8 @@ dataset    <- snakemake@wildcards$dataset
 fdsFile    <- snakemake@input$fdsin
 workingDir <- snakemake@params$workingDir
 
-register(MulticoreParam(snakemake@threads))
 # Limit number of threads for DelayedArray operations
-setAutoBPPARAM(MulticoreParam(snakemake@threads))
+setAutoBPPARAM(MulticoreParam(4))
 
 # Load fds and create a new one
 fds <- loadFraserDataSet(dir=workingDir, name=paste(dataset, annotation, sep = '--'))
@@ -92,7 +103,7 @@ res_gene <- results(fds, psiType=psiTypes,
                     all=TRUE)
 res_genes_dt   <- as.data.table(res_gene)
 print('Results per gene extracted')
-write_tsv(res_genes_dt, file=snakemake@output$resultTableGene_full)
+write_tsv(res_genes_dt, file=sub(".tsv", "_dna_first.tsv", snakemake@output$resultTableGene_full, fixed = TRUE))
 
 # Subset gene results to aberrant
 padj_cols <- grep("padjustGene", colnames(res_genes_dt), value=TRUE)
@@ -148,6 +159,6 @@ if(assemblyVersion %in% c("hg19", "hg38")){
 
 # Results
 options(scipen=999)
-write_tsv(res_junc_dt, file=snakemake@output$resultTableJunc)
-write_tsv(res_genes_dt, file=snakemake@output$resultTableGene_aberrant)
-fwrite(all_junc_res, sep='\t', file=paste0("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/", cohort, "/results_all.tsv.gz"))
+write_tsv(res_junc_dt, file=sub(".tsv", "_dna_first.tsv", snakemake@output$resultTableJunc, fixed = TRUE))
+write_tsv(res_genes_dt, file=sub(".tsv", "_dna_first.tsv", snakemake@output$resultTableGene_aberrant, fixed = TRUE))
+fwrite(all_junc_res, sep='\t', file=paste0("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/", cohort, "/results_all_dna_first.tsv.gz"))

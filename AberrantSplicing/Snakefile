@@ -7,7 +7,7 @@ cohorts.remove("Unstranded_data")
 rule all:
     input:
         expand(
-            "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all.tsv.gz",
+            "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all_dna_first.tsv.gz",
             cohort=cohorts
         )
 
@@ -17,6 +17,6 @@ rule splicing_dna_first:
     params:
         cohort = "{cohort}"
     output:
-        "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all.tsv.gz"
+        "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/drop_runs/drop_master_202502_allGenes/processed_results/aberrant_splicing/results/v19/fraser/{cohort}/results_all_dna_first.tsv.gz"
     script:
         "dna_first.R"

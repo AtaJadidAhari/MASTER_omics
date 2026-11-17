@@ -1,3 +1,14 @@
+"""
+Main file to create the variants.
+starts reading VEP runs from FRANK: /omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/
+Merges them with AbExp and promoterAI, AbSplice, 
+Merges them with Annotations from MASTER (/omics/odcf/analysis/hipo/hipo_021/GermlineAnalysis/data_object_master_germline/sequencing/) to get ACMG classifications and CADD --> wtf does the varianst from Franks don't have them ... --> then why am I doing one thing twice ...
+
+
+
+"""
+
+
 import pandas as pd
 import polars as pl
 import os
@@ -24,10 +35,6 @@ sys.path.append("/home/a379i/Scripts")   # path to folder containing the python 
 from utils.load_gtf_cgc_dresden import *
 from utils.util_functions import *
 from ProteinExpression.load_pr_data import *
-
-
-# vcf_base_path = "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/0_germline_vcfs"
-vcf_base_path = "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/1_somatic_vcfs"
 
 
 
@@ -59,13 +66,19 @@ def get_csq_headers(vcf_path):
 
 # Use it on your file
 
-csq_headers = get_csq_headers("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/1_somatic_vcfs/7QXG3R_somatic.vcf.gz")
-# csq_headers = get_csq_headers("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/0_germline_vcfs/RUQHG9_germline.vcf.gz")
+variant_type = "germline"
+# variant_type = "somatic"
 
-# csq_headers
+vcf_base_path = "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/0_germline_vcfs"
+csq_headers = get_csq_headers("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/0_germline_vcfs/RUQHG9_germline.vcf.gz")
 
 
-import polars as pl
+if variant_type == "somatic":
+    vcf_base_path = "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/1_somatic_vcfs"
+    csq_headers = get_csq_headers("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/1_somatic_vcfs/7QXG3R_somatic.vcf.gz")
+
+
+
 all_dfs = []
 
 for vep_res in os.listdir(vcf_base_path):
@@ -129,6 +142,7 @@ for vep_res in os.listdir(vcf_base_path):
 
 res = pd.concat(all_dfs)
 
+print(res.shape, "shape of res after laoding and reading all variants")
 
 valid_positions = (
     res["POS"]
@@ -166,26 +180,98 @@ promoter_ai['hg19_start'] = promoter_ai['hg19_start'].astype(float)
 abexp['end'] = abexp['end'].astype(float)
 
 
-merged_vars = res.merge(promoter_ai, left_on=["#CHROM", "POS", "REF", "ALT", "Gene"], right_on=["chrom", "hg19_start", "ref", "alt", "gene_id"], how="left").drop(columns=[ "chrom"])      
+merged_vars = res.merge(promoter_ai, left_on=["#CHROM", "POS", "REF", "ALT", "Gene"], right_on=["chrom", "hg19_start", "ref", "alt", "gene_id"], how="left").drop(columns=[ "chrom", "hg19_start", "ref", "alt", "gene_id"])      
+print(merged_vars.shape, " shape after merging with promoterai")
 
-merged_vars = merged_vars.merge(abexp, left_on=["POS", "#CHROM", "REF", "ALT", "Gene"], right_on=["end", "seqnames", "ref", "alt", "gene"], how="left")
+print(merged_vars.columns)
+merged_vars = merged_vars.merge(abexp, left_on=["POS", "#CHROM", "REF", "ALT", "Gene"], right_on=["end", "seqnames", "ref", "alt", "gene"], how="left").drop(columns=["end", "seqnames", "ref", "alt", "gene_y"])
+
+print(merged_vars.columns)
+
+print(merged_vars.shape, " shape after merging with abexp")
 
 
-variant_type = "somatic"
 
-
-merged_vars = merged_vars.rename(columns={"#Uploaded_variation": f"{variant_type}_#Uploaded_variation", "Consequence": f"{variant_type}_Consequence", "IMPACT": f"{variant_type}_IMPACT", "am_pathogenicity": f"{variant_type}_am_pathogenicity","LoF": f"{variant_type}_am_LoF", "max_spliceai_score": f"{variant_type}_max_spliceai_score", "pangolin_score": f"{variant_type}_pangolin_score", "AbSplice2_max": f"{variant_type}_AbSplice2_max", "promoterAI": f"{variant_type}_promoterAI", "abexp_v1.1": f"{variant_type}_abexp_v1.1" })
-
-
-
-merged_vars["Variant"] = (
-    merged_vars["seqnames"] + ":" + 
-    merged_vars["POS"].astype(str) + ":" + 
-    merged_vars["REF"] + ":" + 
-    merged_vars["ALT"]
+valid_positions = (
+    merged_vars["POS"]
+    .dropna()
+    .unique()
+    .astype(int)
+    .tolist()
 )
+merged_vars["#CHROM"] = "chr" + merged_vars["#CHROM"] 
 
 
-# merged_vars.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/germline_aggregated_predisp_cgc.parquet", index=None)
+absplice_predisp = (pl.scan_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/predisp_cgc_max_abSplice_snvs_hg19.parquet")
+        .filter((pl.col("hg19_end").is_in(valid_positions)))
+        .collect(engine="streaming")
+      ).to_pandas()
+absplice_predisp.shape
 
-merged_vars.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/somatic/somatic_aggregated_predisp_cgc.parquet", index=None)
+merged_vars = merged_vars.merge(absplice_predisp, left_on=["#CHROM", "POS", "REF", "ALT", "Gene"], right_on=["chrom", "hg19_end", "ref", "alt", "gene_id"], how="left").drop(columns=["chrom_y", "hg19_end_y", "ref", "alt", "gene_id"])
+
+print(merged_vars.shape, " shape after merging with absplice")
+
+
+cpt1 = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/resources/CPT1_hg19_vars_all_protein_coding_genes.parquet")
+cpt1 = cpt1[list(cpt1.columns[8:]) + ["REF", "ALT"]]
+
+merged_vars = merged_vars.merge(cpt1, left_on=["#CHROM", "POS", "REF", "ALT", "Gene"], right_on=["hg19_chrom", "hg19_pos", "REF", "ALT", "geneID_short"], how="left").drop(columns=["hg19_chrom", "hg19_pos", "geneID_short"])
+
+merged_vars = merged_vars.rename(columns={"#Uploaded_variation": f"{variant_type}_#Uploaded_variation", "Consequence": f"{variant_type}_Consequence", "IMPACT": f"{variant_type}_IMPACT", "am_pathogenicity": f"{variant_type}_am_pathogenicity","LoF": f"{variant_type}_am_LoF", "max_spliceai_score": f"{variant_type}_max_spliceai_score", "pangolin_score": f"{variant_type}_pangolin_score", "AbSplice2_max": f"{variant_type}_AbSplice2_max", "promoterAI": f"{variant_type}_promoterAI", "abexp_v1.1": f"{variant_type}_abexp_v1.1" , "CPT1_score": f"{variant_type}_CPT1_score" })
+
+
+
+
+
+
+
+
+
+merged_vars.to_parquet(f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/{variant_type}/{variant_type}_aggregated_predisp_cgc.parquet", index=None)
+
+## add TINDA annotations (ACMG, Charger, ...)
+dresden_germline_all = (pl.scan_parquet(f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/{variant_type}/{variant_type}_aggregated_predisp_cgc.parquet")
+                    .filter(pl.col("PID").is_in(sa["pid"]))
+                    .collect(engine="streaming")        
+                  ).to_pandas()
+
+dresden_germline_all = dresden_germline_all.merge(sa[["pid", "nct_pid"]], how="left", left_on="PID", right_on="pid")
+
+annotated_vars = (pl.scan_parquet(
+                  "/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/cnv/germline_predisp_cgc_all_TINDA.parquet")
+                  .filter((pl.col("POS").is_in(dresden_germline_all["POS"])))
+                  .collect(engine="streaming")
+                 )
+
+
+
+annotated_vars = annotated_vars.to_pandas().drop_duplicates(subset = ["#CHROM", "POS", "REF", "ALT", "HUGO_Symbol"])
+
+
+annotated_vars["vcf_path"] = "."
+
+print(dresden_germline_all.columns)
+pids = dresden_germline_all["nct_pid"].unique()
+
+
+
+all_dfs = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/germline/l_lp_vars.parquet")
+
+
+all_dfs = pd.concat((annotated_vars[["#CHROM", "POS", "REF", "ALT", "ACMG_Classification","CharGer_Classification", "ClinVar_Pathogenicity", "HUGO_Symbol", "CADD_PHRED", "vcf_path"]], all_dfs[["#CHROM", "POS", "REF", "ALT", "ACMG_Classification","CharGer_Classification", "ClinVar_Pathogenicity"]], annotated_vars[["#CHROM", "POS", "REF", "ALT", "ACMG_Classification","CharGer_Classification", "ClinVar_Pathogenicity", "HUGO_Symbol", "CADD_PHRED", "vcf_path"]]))
+
+all_dfs = all_dfs.drop_duplicates(subset = ["#CHROM", "POS", "REF", "ALT", "HUGO_Symbol"])
+
+
+
+
+dresden_germline_all["#CHROM"] = dresden_germline_all["#CHROM"].str.split("chr").str[1]
+
+dresden_germline_all = dresden_germline_all.merge(all_dfs[["#CHROM", "POS", "REF", "ALT", "ACMG_Classification","CharGer_Classification", "ClinVar_Pathogenicity", "HUGO_Symbol", "CADD_PHRED"]], how="left", left_on=["#CHROM", "POS", "REF", "ALT", "SYMBOL"], right_on = ["#CHROM", "POS", "REF", "ALT", "HUGO_Symbol"]).rename(columns={"ACMG_Classification": f"{variant_type}_ACMG_Classification", "CharGer_Classification": f"{variant_type}_CharGer_Classification", "ClinVar_Pathogenicity": f"{variant_type}_ClinVar_Pathogenicity", "CADD_PHRED": f"{variant_type}_CADD_PHRED"})
+
+
+
+
+
+dresden_germline_all.to_parquet(f"/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/vcf/dresden_annotations/{variant_type}/{variant_type}_aggregated_predisp_cgc_tinda.parquet", index=None)

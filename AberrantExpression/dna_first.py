@@ -95,9 +95,12 @@ or_res = pd.read_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py
 # py_or_res_aberrant.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_outliers.parquet", index=None)
 
 
-or_res_predispostion = or_res[or_res["geneID_short"].isin(genes_of_interest["geneID_short"])]
+# or_res_predispostion = or_res[or_res["geneID_short"].isin(genes_of_interest["geneID_short"])]
 
-or_res_predispostion['padjust_genes_of_interest'] = _false_discovery_control(or_res_predispostion['pValue'].values, method='bh')
+# or_res_predispostion['padjust_genes_of_interest'] = _false_discovery_control(or_res_predispostion['pValue'].values, method='bh')
+
+
+
 
 or_res = or_res.merge(or_res_predispostion[["sampleID", "geneID", "padjust_genes_of_interest"]], how="left", on=["sampleID", "geneID"])
 or_res.to_parquet("/omics/odcf/analysis/hipo/hipo_021/outlier_analysis/py_outrider_runs/all_cohorts/oht_cov_diag_lr_0_0001_epoc200_gpu/or_variants_interesting_genes_padjust_cnv.parquet", index=None)
